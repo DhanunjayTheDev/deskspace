@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, User, Phone, Users, Loader2, MessageCircle, Building2, ChevronDown } from "lucide-react";
+import { X, User, Phone, Users, Loader2, MessageCircle, Building2 } from "lucide-react";
 import { leadApi } from "../services/api";
 import type { Workspace } from "../types/workspace";
+import CustomSelect from "./CustomSelect";
 
 interface Props {
   workspace: Workspace;
@@ -141,19 +142,14 @@ export default function ContactModal({ workspace, isOpen, onClose, whatsappNumbe
 
                 {workspace.type && workspace.type.length > 0 && (
                   <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none z-10" />
-                    <select
+                    <CustomSelect
                       value={form.type}
-                      onChange={(e) => setForm({ ...form, type: e.target.value })}
-                      className="w-full pl-10 pr-10 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all appearance-none cursor-pointer"
-                      required
-                    >
-                      <option value="">Select Workspace Type</option>
-                      {workspace.type.map((t) => (
-                        <option key={t} value={t}>{t}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      onChange={(val) => setForm({ ...form, type: val })}
+                      options={workspace.type}
+                      placeholder="Select Workspace Type"
+                      icon={<Building2 className="w-4 h-4" />}
+                      triggerClassName="py-3 bg-gray-50"
+                    />
                   </div>
                 )}
 

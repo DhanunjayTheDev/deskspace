@@ -1,5 +1,6 @@
 import { memo, useState } from "react";
 import { MapPin, Users, IndianRupee, SlidersHorizontal, X, Building2 } from "lucide-react";
+import CustomSelect from "./CustomSelect";
 
 export interface FilterValues {
   city: string;
@@ -58,15 +59,14 @@ function Filters({ filters, onChange }: Props) {
         />
       </div>
       <div className="relative flex-1 min-w-[160px]">
-        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-        <select
+        <CustomSelect
           value={filters.type}
-          onChange={(e) => update("type", e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all appearance-none"
-        >
-          <option value="">All Types</option>
-          {WORKSPACE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-        </select>
+          onChange={(val) => update("type", val)}
+          options={WORKSPACE_TYPES}
+          placeholder="All Types"
+          icon={<Building2 className="w-4 h-4" />}
+          className="w-full"
+        />
       </div>
       <div className="relative flex-1 min-w-[120px]">
         <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

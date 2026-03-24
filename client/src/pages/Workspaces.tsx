@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import WorkspaceCard from "../components/WorkspaceCard";
 import SkeletonCard from "../components/SkeletonCard";
 import Filters, { type FilterValues } from "../components/Filters";
+// @ts-ignore
+import RotatingText from "../components/RotatingText";
 import { useFetch } from "../hooks/useFetch";
 import { workspaceApi, type WorkspaceFilters } from "../services/api";
 
@@ -48,7 +50,23 @@ export default function Workspaces() {
           transition={{ duration: 0.4 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-gray-900">Explore Workspaces</h1>
+          <h1 className="text-3xl font-bold text-gray-900 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+            <span>Find Your Perfect</span>
+            <RotatingText
+              texts={[
+                "Private Office",
+                "Meeting Rooms",
+                "Dedicated Desks",
+                "Virtual Office",
+                "Training Room",
+              ]}
+              mainClassName="text-primary-600 inline-block"
+              elementLevelClassName="text-primary-600"
+              rotationInterval={3000}
+              splitBy="characters"
+              staggerDuration={0.02}
+            />
+          </h1>
           <p className="text-gray-500 mt-2">Find the perfect space for your team</p>
         </motion.div>
 

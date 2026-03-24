@@ -40,4 +40,8 @@ export interface Stats {
   totalLeads: number;
   newLeadsToday: number;
   conversionRate: number;
+  statusCounts: { new: number; contacted: number; converted: number };
+  leadsByDay: { date: string; day: string; count: number }[];
+  typeDistribution: { name: string; value: number }[];
+  topWorkspaces: { name: string; leads: number }[];
 }
