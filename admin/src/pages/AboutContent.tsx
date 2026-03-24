@@ -4,6 +4,8 @@ import api from "../lib/api";
 import { useToast } from "../context/ToastContext";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { useConfirm } from "../hooks/useConfirm";
+import ImageUploadField from "../components/ImageUploadField";
+import { uploadImage } from "../lib/uploadImage";
 
 type Tab = "team" | "awards";
 
@@ -70,23 +72,37 @@ const ta = `${inp} resize-none`;
 function TeamTab() {
   const { items, loading, create, update, remove } = useContent<TeamMember>("team");
   const [editing, setEditing] = useState<Partial<TeamMember> | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
   const { confirm, dialogProps } = useConfirm();
 
   const empty: Partial<TeamMember> = { name: "", role: "", bio: "", photo: "", isActive: true, order: 0 };
-  const open = (m?: TeamMember) => setEditing(m ?? empty);
-  const close = () => setEditing(null);
+  const open = (m?: TeamMember) => {
+    if (m) {
+      setEditing(m);
+    } else {
+      const nextOrder = items.length > 0 ? Math.max(...items.map(i => i.order)) + 1 : 0;
+      setEditing({ ...empty, order: nextOrder });
+    }
+    setPendingFile(null);
+  };
+  const close = () => { setEditing(null); setPendingFile(null); };
 
   const save = async () => {
     if (!editing?.name || !editing?.role) return toast.warning("Name and role are required");
     setSaving(true);
     try {
+      let body: Partial<TeamMember> = { ...editing };
+      if (pendingFile) {
+        const url = await uploadImage(pendingFile, "team");
+        body = { ...body, photo: url };
+      }
       if ((editing as TeamMember)._id) {
-        await update((editing as TeamMember)._id, editing);
+        await update((editing as TeamMember)._id, body);
         toast.success("Team member updated");
       } else {
-        await create(editing);
+        await create(body);
         toast.success("Team member added");
       }
       close();
@@ -139,7 +155,14 @@ function TeamTab() {
           <div className="space-y-3">
             <div><label className="text-xs font-medium text-gray-700 block mb-1">Name *</label><input className={inp} value={editing.name ?? ""} onChange={e => setEditing(p => ({ ...p!, name: e.target.value }))} /></div>
             <div><label className="text-xs font-medium text-gray-700 block mb-1">Role / Designation *</label><input className={inp} value={editing.role ?? ""} placeholder="e.g. CEO & Co-Founder" onChange={e => setEditing(p => ({ ...p!, role: e.target.value }))} /></div>
-            <div><label className="text-xs font-medium text-gray-700 block mb-1">Photo URL</label><input className={inp} value={editing.photo ?? ""} placeholder="https://..." onChange={e => setEditing(p => ({ ...p!, photo: e.target.value }))} /></div>
+            <ImageUploadField
+              label="Photo"
+              currentUrl={editing.photo}
+              pendingFile={pendingFile}
+              onFileChange={setPendingFile}
+              onUrlClear={() => setEditing(p => ({ ...p!, photo: "" }))}
+              rounded
+            />
             <div><label className="text-xs font-medium text-gray-700 block mb-1">Bio</label><textarea rows={3} className={ta} value={editing.bio ?? ""} onChange={e => setEditing(p => ({ ...p!, bio: e.target.value }))} /></div>
             <div className="flex gap-3">
               <div><label className="text-xs font-medium text-gray-700 block mb-1">Order</label><input type="number" className={inp} value={editing.order ?? 0} onChange={e => setEditing(p => ({ ...p!, order: Number(e.target.value) }))} /></div>
@@ -166,23 +189,37 @@ function TeamTab() {
 function AwardsTab() {
   const { items, loading, create, update, remove } = useContent<Award>("awards");
   const [editing, setEditing] = useState<Partial<Award> | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
   const { confirm, dialogProps } = useConfirm();
 
   const empty: Partial<Award> = { title: "", year: "", description: "", image: "", isActive: true, order: 0 };
-  const open = (a?: Award) => setEditing(a ?? empty);
-  const close = () => setEditing(null);
+  const open = (a?: Award) => {
+    if (a) {
+      setEditing(a);
+    } else {
+      const nextOrder = items.length > 0 ? Math.max(...items.map(i => i.order)) + 1 : 0;
+      setEditing({ ...empty, order: nextOrder });
+    }
+    setPendingFile(null);
+  };
+  const close = () => { setEditing(null); setPendingFile(null); };
 
   const save = async () => {
     if (!editing?.title) return toast.warning("Title is required");
     setSaving(true);
     try {
+      let body: Partial<Award> = { ...editing };
+      if (pendingFile) {
+        const url = await uploadImage(pendingFile, "award");
+        body = { ...body, image: url };
+      }
       if ((editing as Award)._id) {
-        await update((editing as Award)._id, editing);
+        await update((editing as Award)._id, body);
         toast.success("Award updated");
       } else {
-        await create(editing);
+        await create(body);
         toast.success("Award added");
       }
       close();
@@ -238,7 +275,13 @@ function AwardsTab() {
               <div><label className="text-xs font-medium text-gray-700 block mb-1">Year</label><input className={inp} value={editing.year ?? ""} placeholder="2024" onChange={e => setEditing(p => ({ ...p!, year: e.target.value }))} /></div>
               <div><label className="text-xs font-medium text-gray-700 block mb-1">Order</label><input type="number" className={inp} value={editing.order ?? 0} onChange={e => setEditing(p => ({ ...p!, order: Number(e.target.value) }))} /></div>
             </div>
-            <div><label className="text-xs font-medium text-gray-700 block mb-1">Image URL</label><input className={inp} value={editing.image ?? ""} placeholder="https://..." onChange={e => setEditing(p => ({ ...p!, image: e.target.value }))} /></div>
+            <ImageUploadField
+              label="Award Image"
+              currentUrl={editing.image}
+              pendingFile={pendingFile}
+              onFileChange={setPendingFile}
+              onUrlClear={() => setEditing(p => ({ ...p!, image: "" }))}
+            />
             <div><label className="text-xs font-medium text-gray-700 block mb-1">Description</label><textarea rows={3} className={ta} value={editing.description ?? ""} onChange={e => setEditing(p => ({ ...p!, description: e.target.value }))} /></div>
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={editing.isActive ?? true} onChange={e => setEditing(p => ({ ...p!, isActive: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-primary-600" />

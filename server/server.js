@@ -17,6 +17,7 @@ app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/workspaces", require("./routes/workspaceRoutes"));
 app.use("/api/leads", require("./routes/leadRoutes"));
 app.use("/api/site", require("./routes/siteRoutes"));
+app.use("/api/upload", require("./routes/uploadRoute"));
 
 // SSE – real-time event stream for admin panel
 app.get("/api/events", auth, (req, res) => {

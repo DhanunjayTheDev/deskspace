@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Sparkles, Shield, Clock, Headphones, Star, ChevronDown, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import Avatar from "boring-avatars";
 import { useState } from "react";
 import SearchBar from "../components/SearchBar";
 import WorkspaceCard from "../components/WorkspaceCard";
@@ -371,7 +372,7 @@ export default function Home() {
                   <div className="flex items-center gap-3 pt-2 border-t border-gray-50">
                     {t.photo
                       ? <img src={t.photo} alt={t.name} className="w-10 h-10 rounded-full object-cover" />
-                      : <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-purple-400 flex items-center justify-center text-white font-bold">{t.name[0]}</div>
+                      : <Avatar size={40} name={t.name || "User"} variant="beam" colors={["#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe", "#e0e7ff"]} />
                     }
                     <div>
                       <p className="text-sm font-semibold text-gray-900">{t.name}</p>
@@ -488,7 +489,7 @@ export default function Home() {
                 Get Your Workspace in Minutes
               </h2>
               <p className="text-primary-100 text-lg mb-8 max-w-xl mx-auto">
-                Browse premium workspaces, connect with owners, and secure your perfect space — all in one place.
+                Browse premium workspaces, connect with owners, and secure your perfect space all in one place.
               </p>
               <Link
                 to="/workspaces"

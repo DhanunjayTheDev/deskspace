@@ -1,9 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { Plus, Pencil, Trash2, Loader2, X, Star, Check } from "lucide-react";
+import Avatar from "boring-avatars";
 import api from "../lib/api";
 import { useToast } from "../context/ToastContext";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { useConfirm } from "../hooks/useConfirm";
+import ImageUploadField from "../components/ImageUploadField";
+import { uploadImage } from "../lib/uploadImage";
 
 type Tab = "testimonials" | "partners" | "faqs";
 
@@ -79,23 +82,37 @@ const ta = `${inp} resize-none`;
 function TestimonialsTab() {
   const { items, loading, create, update, remove } = useContent<Testimonial>("testimonials");
   const [editing, setEditing] = useState<Partial<Testimonial> | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
   const { confirm, dialogProps } = useConfirm();
 
   const empty: Partial<Testimonial> = { name: "", role: "", company: "", photo: "", quote: "", rating: 5, isActive: true, order: 0 };
-  const open = (t?: Testimonial) => setEditing(t ?? empty);
-  const close = () => setEditing(null);
+  const open = (t?: Testimonial) => {
+    if (t) {
+      setEditing(t);
+    } else {
+      const nextOrder = items.length > 0 ? Math.max(...items.map(i => i.order)) + 1 : 0;
+      setEditing({ ...empty, order: nextOrder });
+    }
+    setPendingFile(null);
+  };
+  const close = () => { setEditing(null); setPendingFile(null); };
 
   const save = async () => {
     if (!editing?.name || !editing?.quote) return toast.warning("Name and quote are required");
     setSaving(true);
     try {
+      let body: Partial<Testimonial> = { ...editing };
+      if (pendingFile) {
+        const url = await uploadImage(pendingFile, "avatar");
+        body = { ...body, photo: url };
+      }
       if ((editing as Testimonial)._id) {
-        await update((editing as Testimonial)._id, editing);
+        await update((editing as Testimonial)._id, body);
         toast.success("Testimonial updated");
       } else {
-        await create(editing);
+        await create(body);
         toast.success("Testimonial added");
       }
       close();
@@ -124,7 +141,12 @@ function TestimonialsTab() {
         <div className="space-y-3">
           {items.map((t) => (
             <div key={t._id} className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
-              {t.photo && <img src={t.photo} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />}
+              <div className="flex-shrink-0">
+                {t.photo
+                  ? <img src={t.photo} alt="" className="w-10 h-10 rounded-full object-cover" />
+                  : <Avatar size={40} name={t.name || "User"} variant="beam" colors={["#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe", "#e0e7ff"]} />
+                }
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-gray-900 text-sm">{t.name}</p>
                 <p className="text-xs text-gray-400">{t.role}{t.company ? ` · ${t.company}` : ""}</p>
@@ -148,7 +170,14 @@ function TestimonialsTab() {
               <div><label className="text-xs font-medium text-gray-700 block mb-1">Role</label><input className={inp} value={editing.role ?? ""} onChange={e => setEditing(p => ({ ...p!, role: e.target.value }))} /></div>
               <div><label className="text-xs font-medium text-gray-700 block mb-1">Company</label><input className={inp} value={editing.company ?? ""} onChange={e => setEditing(p => ({ ...p!, company: e.target.value }))} /></div>
             </div>
-            <div><label className="text-xs font-medium text-gray-700 block mb-1">Photo URL</label><input className={inp} value={editing.photo ?? ""} placeholder="https://..." onChange={e => setEditing(p => ({ ...p!, photo: e.target.value }))} /></div>
+            <ImageUploadField
+              label="Photo"
+              currentUrl={editing.photo}
+              pendingFile={pendingFile}
+              onFileChange={setPendingFile}
+              onUrlClear={() => setEditing(p => ({ ...p!, photo: "" }))}
+              rounded
+            />
             <div><label className="text-xs font-medium text-gray-700 block mb-1">Quote *</label><textarea rows={3} className={ta} value={editing.quote ?? ""} onChange={e => setEditing(p => ({ ...p!, quote: e.target.value }))} /></div>
             <div><label className="text-xs font-medium text-gray-700 block mb-1">Rating</label>
               <div className="flex gap-1">{[1,2,3,4,5].map(n => (
@@ -180,23 +209,37 @@ function TestimonialsTab() {
 function PartnersTab() {
   const { items, loading, create, update, remove } = useContent<Partner>("partners");
   const [editing, setEditing] = useState<Partial<Partner> | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
   const { confirm, dialogProps } = useConfirm();
 
   const empty: Partial<Partner> = { name: "", logo: "", website: "", isActive: true, order: 0 };
-  const open = (p?: Partner) => setEditing(p ?? empty);
-  const close = () => setEditing(null);
+  const open = (p?: Partner) => {
+    if (p) {
+      setEditing(p);
+    } else {
+      const nextOrder = items.length > 0 ? Math.max(...items.map(i => i.order)) + 1 : 0;
+      setEditing({ ...empty, order: nextOrder });
+    }
+    setPendingFile(null);
+  };
+  const close = () => { setEditing(null); setPendingFile(null); };
 
   const save = async () => {
     if (!editing?.name) return toast.warning("Name is required");
     setSaving(true);
     try {
+      let body: Partial<Partner> = { ...editing };
+      if (pendingFile) {
+        const url = await uploadImage(pendingFile, "logo");
+        body = { ...body, logo: url };
+      }
       if ((editing as Partner)._id) {
-        await update((editing as Partner)._id, editing);
+        await update((editing as Partner)._id, body);
         toast.success("Partner updated");
       } else {
-        await create(editing);
+        await create(body);
         toast.success("Partner added");
       }
       close();
@@ -241,7 +284,14 @@ function PartnersTab() {
         <Modal title={(editing as Partner)._id ? "Edit Partner" : "Add Partner"} onClose={close}>
           <div className="space-y-3">
             <div><label className="text-xs font-medium text-gray-700 block mb-1">Company Name *</label><input className={inp} value={editing.name ?? ""} onChange={e => setEditing(p => ({ ...p!, name: e.target.value }))} /></div>
-            <div><label className="text-xs font-medium text-gray-700 block mb-1">Logo URL</label><input className={inp} value={editing.logo ?? ""} placeholder="https://..." onChange={e => setEditing(p => ({ ...p!, logo: e.target.value }))} /></div>
+            <ImageUploadField
+              label="Logo"
+              currentUrl={editing.logo}
+              pendingFile={pendingFile}
+              onFileChange={setPendingFile}
+              onUrlClear={() => setEditing(p => ({ ...p!, logo: "" }))}
+              previewClass="h-14 w-auto max-w-[120px] object-contain rounded-lg"
+            />
             <div><label className="text-xs font-medium text-gray-700 block mb-1">Website URL</label><input className={inp} value={editing.website ?? ""} placeholder="https://..." onChange={e => setEditing(p => ({ ...p!, website: e.target.value }))} /></div>
             <div className="flex gap-3">
               <div><label className="text-xs font-medium text-gray-700 block mb-1">Order</label><input type="number" className={inp} value={editing.order ?? 0} onChange={e => setEditing(p => ({ ...p!, order: Number(e.target.value) }))} /></div>
@@ -273,7 +323,14 @@ function FAQsTab() {
   const { confirm, dialogProps } = useConfirm();
 
   const empty: Partial<FAQ> = { question: "", answer: "", isActive: true, order: 0 };
-  const open = (f?: FAQ) => setEditing(f ?? empty);
+  const open = (f?: FAQ) => {
+    if (f) {
+      setEditing(f);
+    } else {
+      const nextOrder = items.length > 0 ? Math.max(...items.map(i => i.order)) + 1 : 0;
+      setEditing({ ...empty, order: nextOrder });
+    }
+  };
   const close = () => setEditing(null);
 
   const save = async () => {
