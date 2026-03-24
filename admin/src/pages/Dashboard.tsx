@@ -127,20 +127,20 @@ export default function Dashboard() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {cards.map((c) => (
           <div
             key={c.label}
-            className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col gap-3"
+            className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 flex flex-col gap-2 sm:gap-3"
           >
             <div className="flex items-center justify-between">
-              <div className={`w-9 h-9 rounded-lg ${c.iconBg} flex items-center justify-center`}>
-                <c.icon className={`w-4 h-4 ${c.color}`} />
+              <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg ${c.iconBg} flex items-center justify-center`}>
+                <c.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${c.color}`} />
               </div>
               <span className="text-xs text-gray-400 font-medium">{c.trend}</span>
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{c.value}</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{c.value}</p>
               <p className="text-xs text-gray-500 mt-0.5">{c.label}</p>
             </div>
           </div>

@@ -61,7 +61,7 @@ function useContent<T extends Item>(endpoint: string) {
 /* ─── Small FormModal ────────────────────────────────────── */
 function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div className="fixed inset-0 z-[999] flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl shadow-2xl z-10 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white">
@@ -429,12 +429,12 @@ export default function SiteContent() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-gray-100 rounded-xl w-fit mb-6">
+      <div className="flex gap-1 p-1 bg-gray-100 rounded-xl mb-6 overflow-x-auto">
         {TABS.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
               tab === t.id ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
             }`}
           >

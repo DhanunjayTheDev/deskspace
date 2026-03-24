@@ -4,6 +4,7 @@ import { SSEProvider } from "./context/SSEContext";
 import { ToastProvider } from "./context/ToastContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Sidebar from "./components/Sidebar";
+import BottomNav from "./components/BottomNav";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Workspaces from "./pages/Workspaces";
@@ -16,9 +17,10 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
-      <main className="lg:ml-64 pt-14 lg:pt-0">
+      <main className="lg:ml-64 pt-14 lg:pt-0 pb-16 lg:pb-0">
         <div className="p-4 sm:p-6 lg:p-8">{children}</div>
       </main>
+      <BottomNav />
     </div>
   );
 }

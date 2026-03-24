@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
+import BottomNav from "./components/BottomNav";
 
 const Home = lazy(() => import("./pages/Home"));
 const Workspaces = lazy(() => import("./pages/Workspaces"));
@@ -23,7 +24,7 @@ export default function App() {
       <ScrollToTop />
       <div className="flex flex-col min-h-screen">
         <Navbar />
-        <main className="flex-1">
+        <main className="flex-1 pb-16 md:pb-0">
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Home />} />
@@ -34,6 +35,7 @@ export default function App() {
           </Suspense>
         </main>
         <Footer />
+        <BottomNav />
       </div>
     </BrowserRouter>
   );

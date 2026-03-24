@@ -101,23 +101,23 @@ export default function Leads() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Leads</h1>
           <p className="text-sm text-gray-500 mt-1">{filtered.length} of {leads.length} total leads</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search name or phone…"
-              className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 w-52"
+              className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 w-full sm:w-52"
             />
           </div>
-          <span className="text-xs text-gray-400 flex items-center gap-1.5">
+          <span className="text-xs text-gray-400 flex items-center gap-1.5 flex-shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Live
           </span>

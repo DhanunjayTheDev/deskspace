@@ -29,9 +29,6 @@ export default function Sidebar() {
           <Building2 className="w-4 h-4 text-white" />
         </div>
         <span className="text-lg font-bold text-gray-900">DeskSpace</span>
-        <span className="ml-auto text-[10px] font-medium text-primary-600 bg-primary-50 px-2 py-0.5 rounded-full">
-          Admin
-        </span>
       </div>
 
       {/* Navigation */}
