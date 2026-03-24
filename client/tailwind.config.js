@@ -18,7 +18,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+        sans: ["Poppins", "system-ui", "-apple-system", "sans-serif"],
       },
       borderRadius: {
         xl: "1rem",
@@ -32,5 +32,30 @@ export default {
     },
   },
   plugins: [
-    require('lightswind/plugin'),],
+    require('lightswind/plugin'),
+    require('tailwind-scrollbar'),
+    {
+      handler: ({ addUtilities, theme }) => {
+        addUtilities({
+          ".scrollbar-primary": {
+            "scrollbar-color": `${theme("colors.primary.500")} transparent`,
+            "scrollbar-width": "8px",
+          },
+          ".scrollbar-primary::-webkit-scrollbar": {
+            width: "8px",
+          },
+          ".scrollbar-primary::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+          ".scrollbar-primary::-webkit-scrollbar-thumb": {
+            background: theme("colors.primary.500"),
+            borderRadius: "4px",
+          },
+          ".scrollbar-primary::-webkit-scrollbar-thumb:hover": {
+            background: theme("colors.primary.600"),
+          },
+        });
+      },
+    },
+  ],
 };

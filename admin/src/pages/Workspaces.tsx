@@ -6,6 +6,7 @@ import type { Workspace } from "../types";
 import { useSSEContext } from "../context/SSEContext";
 import { useToast } from "../context/ToastContext";
 import ConfirmDialog from "../components/ConfirmDialog";
+import WorkspaceDetailModal from "../components/WorkspaceDetailModal";
 import { useConfirm } from "../hooks/useConfirm";
 
 export default function Workspaces() {
@@ -13,6 +14,7 @@ export default function Workspaces() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
   const toast = useToast();
   const { confirm, dialogProps } = useConfirm();
 
@@ -145,7 +147,7 @@ export default function Workspaces() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filtered.map((w) => (
-                  <tr key={w._id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={w._id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => setSelectedWorkspace(w)}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {w.images[0] ? (
@@ -230,6 +232,7 @@ export default function Workspaces() {
         </div>
       )}
       <ConfirmDialog {...dialogProps} />
+      <WorkspaceDetailModal open={!!selectedWorkspace} workspace={selectedWorkspace} onClose={() => setSelectedWorkspace(null)} />
     </div>
   );
 }

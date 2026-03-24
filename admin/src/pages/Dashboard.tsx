@@ -36,11 +36,12 @@ const renderCustomLabel = (props: PieLabelRenderProps) => {
   const ma = typeof midAngle === "number" ? midAngle : 0;
   const cxn = typeof cx === "number" ? cx : 0;
   const cyn = typeof cy === "number" ? cy : 0;
-  const radius = ri + (ro - ri) * 0.55;
+  // Position label OUTSIDE the ring
+  const radius = ro + 35;
   const x = cxn + radius * Math.cos(-ma * RADIAN);
   const y = cyn + radius * Math.sin(-ma * RADIAN);
   return (
-    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight={600}>
+    <text x={x} y={y} fill="#4b5563" textAnchor="middle" dominantBaseline="central" fontSize={13} fontWeight={700}>
       {`${(percent * 100).toFixed(0)}%`}
     </text>
   );
