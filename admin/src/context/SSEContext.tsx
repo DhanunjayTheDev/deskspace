@@ -24,7 +24,7 @@ export function SSEProvider({ children }: { children: ReactNode }) {
     if (!token) return;
 
     const es = new EventSource(
-      `/api/events?token=${encodeURIComponent(token)}`
+      `${import.meta.env.VITE_API_BASE_URL}/api/events?token=${encodeURIComponent(token)}`
     );
 
     const handle = (eventName: string) => (e: Event) => {
