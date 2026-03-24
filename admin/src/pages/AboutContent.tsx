@@ -1,6 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { Plus, Pencil, Trash2, Loader2, X, Check, Trophy } from "lucide-react";
 import api from "../lib/api";
+import { useToast } from "../context/ToastContext";
+import ConfirmDialog from "../components/ConfirmDialog";
+import { useConfirm } from "../hooks/useConfirm";
 
 type Tab = "team" | "awards";
 
@@ -68,20 +71,36 @@ function TeamTab() {
   const { items, loading, create, update, remove } = useContent<TeamMember>("team");
   const [editing, setEditing] = useState<Partial<TeamMember> | null>(null);
   const [saving, setSaving] = useState(false);
+  const toast = useToast();
+  const { confirm, dialogProps } = useConfirm();
 
   const empty: Partial<TeamMember> = { name: "", role: "", bio: "", photo: "", isActive: true, order: 0 };
   const open = (m?: TeamMember) => setEditing(m ?? empty);
   const close = () => setEditing(null);
 
   const save = async () => {
-    if (!editing?.name || !editing?.role) return alert("Name and role are required");
+    if (!editing?.name || !editing?.role) return toast.warning("Name and role are required");
     setSaving(true);
     try {
-      if ((editing as TeamMember)._id) await update((editing as TeamMember)._id, editing);
-      else await create(editing);
+      if ((editing as TeamMember)._id) {
+        await update((editing as TeamMember)._id, editing);
+        toast.success("Team member updated");
+      } else {
+        await create(editing);
+        toast.success("Team member added");
+      }
       close();
-    } catch { alert("Failed to save"); }
+    } catch { toast.error("Failed to save team member"); }
     finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({ title: "Delete Team Member", message: "Delete this team member? This cannot be undone." });
+    if (!ok) return;
+    try {
+      await remove(id);
+      toast.success("Team member deleted");
+    } catch { toast.error("Failed to delete team member"); }
   };
 
   return (
@@ -108,7 +127,7 @@ function TeamTab() {
               </div>
               <div className="flex gap-1 flex-shrink-0">
                 <button onClick={() => open(m)} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg"><Pencil className="w-4 h-4" /></button>
-                <button onClick={() => { if (window.confirm("Delete?")) remove(m._id); }} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                <button onClick={() => handleDelete(m._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
           ))}
@@ -138,6 +157,7 @@ function TeamTab() {
           </div>
         </Modal>
       )}
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }
@@ -147,20 +167,36 @@ function AwardsTab() {
   const { items, loading, create, update, remove } = useContent<Award>("awards");
   const [editing, setEditing] = useState<Partial<Award> | null>(null);
   const [saving, setSaving] = useState(false);
+  const toast = useToast();
+  const { confirm, dialogProps } = useConfirm();
 
   const empty: Partial<Award> = { title: "", year: "", description: "", image: "", isActive: true, order: 0 };
   const open = (a?: Award) => setEditing(a ?? empty);
   const close = () => setEditing(null);
 
   const save = async () => {
-    if (!editing?.title) return alert("Title is required");
+    if (!editing?.title) return toast.warning("Title is required");
     setSaving(true);
     try {
-      if ((editing as Award)._id) await update((editing as Award)._id, editing);
-      else await create(editing);
+      if ((editing as Award)._id) {
+        await update((editing as Award)._id, editing);
+        toast.success("Award updated");
+      } else {
+        await create(editing);
+        toast.success("Award added");
+      }
       close();
-    } catch { alert("Failed to save"); }
+    } catch { toast.error("Failed to save award"); }
     finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({ title: "Delete Award", message: "Delete this award? This cannot be undone." });
+    if (!ok) return;
+    try {
+      await remove(id);
+      toast.success("Award deleted");
+    } catch { toast.error("Failed to delete award"); }
   };
 
   return (
@@ -187,7 +223,7 @@ function AwardsTab() {
               </div>
               <div className="flex gap-1 flex-shrink-0">
                 <button onClick={() => open(a)} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg"><Pencil className="w-4 h-4" /></button>
-                <button onClick={() => { if (window.confirm("Delete?")) remove(a._id); }} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                <button onClick={() => handleDelete(a._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
           ))}
@@ -217,6 +253,7 @@ function AwardsTab() {
           </div>
         </Modal>
       )}
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }

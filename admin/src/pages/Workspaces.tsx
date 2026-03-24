@@ -4,12 +4,17 @@ import { Plus, Pencil, Trash2, Loader2, MapPin, Users, Eye, EyeOff, Star, Search
 import api from "../lib/api";
 import type { Workspace } from "../types";
 import { useSSEContext } from "../context/SSEContext";
+import { useToast } from "../context/ToastContext";
+import ConfirmDialog from "../components/ConfirmDialog";
+import { useConfirm } from "../hooks/useConfirm";
 
 export default function Workspaces() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const toast = useToast();
+  const { confirm, dialogProps } = useConfirm();
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -60,13 +65,19 @@ export default function Workspaces() {
   }, [subscribe]);
 
   const handleDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    const ok = await confirm({
+      title: "Delete Workspace",
+      message: `Delete "${title}"? This cannot be undone.`,
+      confirmLabel: "Delete",
+    });
+    if (!ok) return;
     setDeleting(id);
     try {
       await api.delete(`/workspaces/${id}`);
       setWorkspaces((prev) => prev.filter((w) => w._id !== id));
+      toast.success(`"${title}" deleted`);
     } catch {
-      alert("Failed to delete workspace");
+      toast.error("Failed to delete workspace");
     } finally {
       setDeleting(null);
     }
@@ -218,6 +229,7 @@ export default function Workspaces() {
           </div>
         </div>
       )}
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }

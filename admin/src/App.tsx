@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { SSEProvider } from "./context/SSEContext";
+import { ToastProvider } from "./context/ToastContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Sidebar from "./components/Sidebar";
 import Login from "./pages/Login";
@@ -27,6 +28,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
       <SSEProvider>
+      <ToastProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route
@@ -86,6 +88,7 @@ export default function App() {
             }
           />
         </Routes>
+      </ToastProvider>
       </SSEProvider>
     </AuthProvider>
     </BrowserRouter>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { ArrowLeft, Loader2, Plus, X, Upload, Image as ImageIcon } from "lucide-react";
 import api from "../lib/api";
+import { useToast } from "../context/ToastContext";
 
 const WORKSPACE_TYPES = [
   "Private Office",
@@ -51,6 +52,7 @@ export default function WorkspaceForm() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [form, setForm] = useState<FormData>(emptyForm);
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -149,10 +151,12 @@ export default function WorkspaceForm() {
         await api.put(`/workspaces/${id}`, fd, {
           headers: { "Content-Type": "multipart/form-data" },
         });
+        toast.success("Workspace updated successfully");
       } else {
         await api.post("/workspaces", fd, {
           headers: { "Content-Type": "multipart/form-data" },
         });
+        toast.success("Workspace created successfully");
       }
 
       navigate("/workspaces");

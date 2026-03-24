@@ -5,6 +5,7 @@ import type { Lead } from "../types";
 import StatusDropdown from "../components/StatusDropdown";
 import LeadModal from "../components/LeadModal";
 import { useSSEContext } from "../context/SSEContext";
+import { useToast } from "../context/ToastContext";
 
 export default function Leads() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -13,6 +14,7 @@ export default function Leads() {
   const [notesText, setNotesText] = useState("");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [search, setSearch] = useState("");
+  const toast = useToast();
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -70,8 +72,11 @@ export default function Leads() {
       const { data } = await api.patch(`/leads/${id}`, { status });
       setLeads((prev) => prev.map((l) => (l._id === id ? { ...l, ...data } : l)));
       setSelectedLead((prev) => (prev?._id === id ? { ...prev, ...data } : prev));
-    } catch {
-      alert("Failed to update status");
+      const label = status.charAt(0).toUpperCase() + status.slice(1);
+      toast.success(`Lead marked as ${label}`);
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to update status";
+      toast.error(msg);
     }
   };
 
@@ -80,8 +85,9 @@ export default function Leads() {
       const { data } = await api.patch(`/leads/${id}`, { notes: notesText });
       setLeads((prev) => prev.map((l) => (l._id === id ? { ...l, ...data } : l)));
       setEditingNotes(null);
+      toast.success("Notes saved");
     } catch {
-      alert("Failed to save notes");
+      toast.error("Failed to save notes");
     }
   };
 

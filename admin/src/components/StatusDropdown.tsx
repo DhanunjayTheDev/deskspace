@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown } from "lucide-react";
+import type React from "react";
 
 export const STATUS_OPTIONS = [
   {
@@ -38,14 +39,18 @@ export default function StatusDropdown({ value, onChange }: Props) {
   const [open, setOpen] = useState(false);
   const [dropPos, setDropPos] = useState<{ top: number; left: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const dropRef = useRef<HTMLDivElement | null>(null);
 
   const current =
     STATUS_OPTIONS.find((o) => o.value === value) ?? STATUS_OPTIONS[0];
 
-  // Close on outside click
+  // Close on outside click — but NOT when clicking inside the portal panel
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      if (
+        ref.current && !ref.current.contains(e.target as Node) &&
+        (!dropRef.current || !dropRef.current.contains(e.target as Node))
+      ) {
         setOpen(false);
       }
     };
@@ -100,6 +105,7 @@ export default function StatusDropdown({ value, onChange }: Props) {
       {open && dropPos &&
         createPortal(
           <div
+            ref={dropRef}
             className="fixed z-[9999] w-36 bg-white rounded-xl border border-gray-200 shadow-xl py-1 overflow-hidden"
             style={{ top: dropPos.top, left: dropPos.left }}
           >

@@ -1,6 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { Plus, Pencil, Trash2, Loader2, X, Star, Check } from "lucide-react";
 import api from "../lib/api";
+import { useToast } from "../context/ToastContext";
+import ConfirmDialog from "../components/ConfirmDialog";
+import { useConfirm } from "../hooks/useConfirm";
 
 type Tab = "testimonials" | "partners" | "faqs";
 
@@ -77,20 +80,36 @@ function TestimonialsTab() {
   const { items, loading, create, update, remove } = useContent<Testimonial>("testimonials");
   const [editing, setEditing] = useState<Partial<Testimonial> | null>(null);
   const [saving, setSaving] = useState(false);
+  const toast = useToast();
+  const { confirm, dialogProps } = useConfirm();
 
   const empty: Partial<Testimonial> = { name: "", role: "", company: "", photo: "", quote: "", rating: 5, isActive: true, order: 0 };
   const open = (t?: Testimonial) => setEditing(t ?? empty);
   const close = () => setEditing(null);
 
   const save = async () => {
-    if (!editing?.name || !editing?.quote) return alert("Name and quote are required");
+    if (!editing?.name || !editing?.quote) return toast.warning("Name and quote are required");
     setSaving(true);
     try {
-      if ((editing as Testimonial)._id) await update((editing as Testimonial)._id, editing);
-      else await create(editing);
+      if ((editing as Testimonial)._id) {
+        await update((editing as Testimonial)._id, editing);
+        toast.success("Testimonial updated");
+      } else {
+        await create(editing);
+        toast.success("Testimonial added");
+      }
       close();
-    } catch { alert("Failed to save"); }
+    } catch { toast.error("Failed to save testimonial"); }
     finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({ title: "Delete Testimonial", message: "Delete this testimonial? This cannot be undone." });
+    if (!ok) return;
+    try {
+      await remove(id);
+      toast.success("Testimonial deleted");
+    } catch { toast.error("Failed to delete testimonial"); }
   };
 
   return (
@@ -114,7 +133,7 @@ function TestimonialsTab() {
               </div>
               <div className="flex gap-1 flex-shrink-0">
                 <button onClick={() => open(t)} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg"><Pencil className="w-4 h-4" /></button>
-                <button onClick={() => { if (window.confirm("Delete?")) remove(t._id); }} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                <button onClick={() => handleDelete(t._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
           ))}
@@ -152,6 +171,7 @@ function TestimonialsTab() {
           </div>
         </Modal>
       )}
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }
@@ -161,20 +181,36 @@ function PartnersTab() {
   const { items, loading, create, update, remove } = useContent<Partner>("partners");
   const [editing, setEditing] = useState<Partial<Partner> | null>(null);
   const [saving, setSaving] = useState(false);
+  const toast = useToast();
+  const { confirm, dialogProps } = useConfirm();
 
   const empty: Partial<Partner> = { name: "", logo: "", website: "", isActive: true, order: 0 };
   const open = (p?: Partner) => setEditing(p ?? empty);
   const close = () => setEditing(null);
 
   const save = async () => {
-    if (!editing?.name) return alert("Name is required");
+    if (!editing?.name) return toast.warning("Name is required");
     setSaving(true);
     try {
-      if ((editing as Partner)._id) await update((editing as Partner)._id, editing);
-      else await create(editing);
+      if ((editing as Partner)._id) {
+        await update((editing as Partner)._id, editing);
+        toast.success("Partner updated");
+      } else {
+        await create(editing);
+        toast.success("Partner added");
+      }
       close();
-    } catch { alert("Failed to save"); }
+    } catch { toast.error("Failed to save partner"); }
     finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({ title: "Delete Partner", message: "Delete this partner? This cannot be undone." });
+    if (!ok) return;
+    try {
+      await remove(id);
+      toast.success("Partner deleted");
+    } catch { toast.error("Failed to delete partner"); }
   };
 
   return (
@@ -194,7 +230,7 @@ function PartnersTab() {
               {!p.isActive && <span className="text-xs text-gray-400">(hidden)</span>}
               <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition">
                 <button onClick={() => open(p)} className="p-1 text-gray-400 hover:text-primary-600 bg-white rounded-lg shadow-sm"><Pencil className="w-3 h-3" /></button>
-                <button onClick={() => { if (window.confirm("Delete?")) remove(p._id); }} className="p-1 text-gray-400 hover:text-red-600 bg-white rounded-lg shadow-sm"><Trash2 className="w-3 h-3" /></button>
+                <button onClick={() => handleDelete(p._id)} className="p-1 text-gray-400 hover:text-red-600 bg-white rounded-lg shadow-sm"><Trash2 className="w-3 h-3" /></button>
               </div>
             </div>
           ))}
@@ -223,6 +259,7 @@ function PartnersTab() {
           </div>
         </Modal>
       )}
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }
@@ -232,20 +269,36 @@ function FAQsTab() {
   const { items, loading, create, update, remove } = useContent<FAQ>("faqs");
   const [editing, setEditing] = useState<Partial<FAQ> | null>(null);
   const [saving, setSaving] = useState(false);
+  const toast = useToast();
+  const { confirm, dialogProps } = useConfirm();
 
   const empty: Partial<FAQ> = { question: "", answer: "", isActive: true, order: 0 };
   const open = (f?: FAQ) => setEditing(f ?? empty);
   const close = () => setEditing(null);
 
   const save = async () => {
-    if (!editing?.question || !editing?.answer) return alert("Question and answer are required");
+    if (!editing?.question || !editing?.answer) return toast.warning("Question and answer are required");
     setSaving(true);
     try {
-      if ((editing as FAQ)._id) await update((editing as FAQ)._id, editing);
-      else await create(editing);
+      if ((editing as FAQ)._id) {
+        await update((editing as FAQ)._id, editing);
+        toast.success("FAQ updated");
+      } else {
+        await create(editing);
+        toast.success("FAQ added");
+      }
       close();
-    } catch { alert("Failed to save"); }
+    } catch { toast.error("Failed to save FAQ"); }
     finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({ title: "Delete FAQ", message: "Delete this FAQ? This cannot be undone." });
+    if (!ok) return;
+    try {
+      await remove(id);
+      toast.success("FAQ deleted");
+    } catch { toast.error("Failed to delete FAQ"); }
   };
 
   return (
@@ -268,7 +321,7 @@ function FAQsTab() {
               </div>
               <div className="flex gap-1 flex-shrink-0">
                 <button onClick={() => open(f)} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg"><Pencil className="w-4 h-4" /></button>
-                <button onClick={() => { if (window.confirm("Delete?")) remove(f._id); }} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                <button onClick={() => handleDelete(f._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
           ))}
@@ -296,6 +349,7 @@ function FAQsTab() {
           </div>
         </Modal>
       )}
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }
