@@ -20,7 +20,7 @@ export default function FloatingContactButton({ whatsappNumber }: Props) {
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
       onClick={handleClick}
-      className="fixed bottom-8 right-8 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 shadow-2xl shadow-green-500/40 flex items-center justify-center hover:shadow-green-500/60 transition-all duration-300"
+      className="fixed bottom-8 right-8 z-40 hidden md:block w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 shadow-2xl shadow-green-500/40 flex items-center justify-center hover:shadow-green-500/60 transition-all duration-300"
       aria-label="Contact on WhatsApp"
     >
       <motion.div

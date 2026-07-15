@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { Building2, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Building2, Mail, Lock, Loader2, AlertCircle, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
@@ -11,11 +11,15 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [mounted, setMounted] = useState(false);
+  const [focused, setFocused] = useState<"email" | "password" | null>(null);
+
+  useEffect(() => setMounted(true), []);
 
   if (authLoading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-[3px] border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+      <div className="h-screen flex items-center justify-center bg-neutral-50">
+        <div className="w-6 h-6 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
       </div>
     );
   }
@@ -42,118 +46,143 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-primary-900 to-primary-800 px-4 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
-        <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
+    <div className="min-h-screen relative bg-neutral-50">
+      {/* Animated mesh gradient background */}
+<div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[150px]" />
+        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-purple-500/10 blur-[150px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-indigo-500/5 blur-[200px]" />
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23000\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')" />
       </div>
 
-      <div className="w-full max-w-sm relative z-10">
-        {/* Logo & Header */}
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-primary-400 to-purple-500 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-primary-500/50 transform hover:scale-110 transition-transform duration-300">
-            <Building2 className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-white mb-2">DeskSpace Admin</h1>
-          <p className="text-sm text-primary-100 font-medium">Manage your workspace listings</p>
-        </div>
+      <div className="relative flex min-h-screen items-center justify-center p-6">
+        {/* Frosted glass card */}
+        <div className={`w-full max-w-md transition-all duration-700 ease-out ${mounted ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-[0.98]'}`}>
+          <div className="relative rounded-2xl bg-white/80 backdrop-blur-xl border border-white/30 shadow-[0_4px_24px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.05)] p-8">
+            {/* Top accent line */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-0.5 rounded-b-full bg-gradient-to-r from-indigo-500 to-purple-500" />
 
-        {/* Form Container */}
-        <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 space-y-6">
-          {/* Email Field */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">Email Address</label>
-            <div className="relative group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 transition-colors group-focus-within:text-primary-600" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@deskspace.in"
-                className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:bg-white transition-all duration-200 shadow-sm hover:border-gray-300"
-                autoFocus
-              />
+            {/* Logo */}
+            <div className={`mb-8 text-center transition-all duration-500 delay-100 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/25">
+                <Building2 className="w-6 h-6 text-white" />
+              </div>
+              <h1 className="mt-5 text-2xl font-bold text-neutral-950 tracking-tight">DeskSpace</h1>
+              <p className="mt-1 text-sm text-neutral-500">Admin Dashboard</p>
             </div>
-          </div>
 
-          {/* Password Field */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700">Password</label>
-            <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400 transition-colors group-focus-within:text-primary-600" />
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full pl-12 pr-12 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:bg-white transition-all duration-200 shadow-sm hover:border-gray-300"
-              />
+            {/* Header */}
+            <div className={`mb-8 text-center transition-all duration-500 delay-200 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <h2 className="text-lg font-semibold text-neutral-950">Sign in to your account</h2>
+              <p className="mt-1.5 text-sm text-neutral-500">Use your admin credentials to access the dashboard.</p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className={`space-y-1.5 transition-all duration-500 delay-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                <label htmlFor="email" className="block text-[13px] font-medium text-neutral-700">Email</label>
+                <div className="relative">
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onFocus={() => setFocused("email")}
+                    onBlur={() => setFocused(null)}
+                    placeholder="admin@deskspace.in"
+                    className={`
+                      w-full h-11 pl-4 pr-10 rounded-lg border bg-white/60 text-sm text-neutral-950 placeholder-neutral-400
+                      focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200
+                      ${focused === 'email' 
+                        ? 'border-indigo-500 bg-white shadow-[0_0_0_3px_rgb(99_102_241_/_0.15)]' 
+                        : 'border-neutral-200 hover:border-neutral-300'
+                      }
+                    `}
+                    autoFocus
+                  />
+                  <Mail className={`
+                    absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200
+                    ${focused === 'email' ? 'text-indigo-500' : 'text-neutral-300'}
+                  `} />
+                </div>
+              </div>
+
+              <div className={`space-y-1.5 transition-all duration-500 delay-400 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                <label htmlFor="password" className="block text-[13px] font-medium text-neutral-700">Password</label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setFocused("password")}
+                    onBlur={() => setFocused(null)}
+                    placeholder="Enter your password"
+                    className={`
+                      w-full h-11 pl-4 pr-10 rounded-lg border bg-white/60 text-sm text-neutral-950 placeholder-neutral-400
+                      focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200
+                      ${focused === 'password' 
+                        ? 'border-indigo-500 bg-white shadow-[0_0_0_3px_rgb(99_102_241_/_0.15)]' 
+                        : 'border-neutral-200 hover:border-neutral-300'
+                      }
+                    `}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-300 hover:text-neutral-500 transition-colors"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <div className={`flex items-center gap-2.5 text-sm text-red-600 bg-red-50 px-4 py-2.5 rounded-lg border border-red-100 transition-all duration-300 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200 p-1 hover:bg-gray-100 rounded-lg"
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                type="submit"
+                disabled={loading}
+                className={`
+                  w-full h-11 rounded-lg text-sm font-semibold text-white
+                  bg-gradient-to-r from-indigo-600 to-purple-600
+                  hover:from-indigo-500 hover:to-purple-500
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                  transition-all duration-200
+                  flex items-center justify-center gap-2
+                  shadow-[0_4px_14px_rgb(99_102_241_/_0.3)]
+                  hover:shadow-[0_6px_20px_rgb(99_102_241_/_0.4)]
+                  active:scale-[0.98]
+                  ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
+                `}
+                style={{ transitionDelay: mounted ? '500ms' : '0ms' }}
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    Continue
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
-            </div>
+            </form>
+
+            <p className={`text-center text-[11px] text-neutral-400 mt-8 transition-all duration-500 delay-600 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              Protected admin area &middot; Contact support for access
+            </p>
           </div>
-
-          {/* Error Alert */}
-          {error && (
-            <div className="flex items-center gap-3 text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl border border-red-200 animate-in slide-in-from-top">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <span className="font-medium">{error}</span>
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 transform active:scale-95"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              "Sign In"
-            )}
-          </button>
-
-          {/* Footer text */}
-          <p className="text-center text-xs text-gray-500 font-medium">
-            Protected admin panel
-          </p>
-        </form>
-
-        {/* Footer message */}
-        <p className="text-center text-xs text-primary-100 mt-6 font-medium">
-          Contact support for access
-        </p>
+        </div>
       </div>
-
-      {/* Add animation keyframes */}
-      <style>{`
-        @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
     </div>
   );
 }

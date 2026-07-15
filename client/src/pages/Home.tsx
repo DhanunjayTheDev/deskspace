@@ -12,12 +12,20 @@ import LogoLoop from "../components/LogoLoop";
 import CircularText from "../components/CircularText";
 // @ts-ignore
 import Typewriter from "../components/Typewriter";
+// @ts-ignore
+import FloatingContactButton from "../components/FloatingContactButton";
 import { useFetch } from "../hooks/useFetch";
 import { workspaceApi, siteApi } from "../services/api";
+
+const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "919666120770";
+const formattedNumber = phoneNumber.startsWith("91") ? `+${phoneNumber}` : `+91${phoneNumber}`;
 
 interface Partner { _id: string; name: string; logo: string; website: string; }
 interface Testimonial { _id: string; name: string; role: string; company: string; photo: string; quote: string; rating: number; }
 interface FAQ { _id: string; question: string; answer: string; }
+
+const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "919999999999";
+const formattedNumber = phoneNumber.startsWith("91") ? `+${phoneNumber}` : `+91${phoneNumber}`;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -501,10 +509,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Floating Phone Button */}
-      <div className="fixed bottom-8 right-8 z-40">
+      {/* Floating Phone Button (desktop left) */}
+      <div className="fixed bottom-8 left-8 z-40 hidden md:block">
         <motion.a
-          href="tel:+919999999999"
+          href={`tel:${formattedNumber}`}
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
@@ -517,6 +525,9 @@ export default function Home() {
           </svg>
         </motion.a>
       </div>
+
+      {/* Floating WhatsApp Button (desktop right) */}
+      <FloatingContactButton whatsappNumber={phoneNumber} />
     </div>
   );
 }

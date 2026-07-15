@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Building2 } from "lucide-react";
+import { Menu, X, Building2, Phone } from "lucide-react";
 
 const links = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
 ];
+
+const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "919666120770";
+const formattedNumber = phoneNumber.startsWith("91") ? `+${phoneNumber}` : `+91${phoneNumber}`;
+const displayNumber = `+91 ${phoneNumber.slice(-10, -5)} ${phoneNumber.slice(-5)}`;
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -43,10 +47,17 @@ export default function Navbar() {
             ))}
             <Link
               to="/workspaces"
-              className="ml-3 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-purple-500 hover:from-primary-600 hover:to-purple-600 shadow-lg shadow-primary-200 hover:shadow-primary-300 transition-all"
+              className="ml-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-purple-500 hover:from-primary-600 hover:to-purple-600 shadow-lg shadow-primary-200 hover:shadow-primary-300 transition-all"
             >
               Find Workspace
             </Link>
+            <a
+              href={`tel:${formattedNumber}`}
+              className="ml-2 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-200 hover:shadow-green-300 transition-all"
+            >
+              <Phone className="w-4 h-4" />
+              <span className="hidden sm:inline">{displayNumber}</span>
+            </a>
           </div>
 
           {/* Mobile menu button */}
@@ -91,6 +102,14 @@ export default function Navbar() {
               >
                 Find Workspace
               </Link>
+              <a
+                href={`tel:${formattedNumber}`}
+                onClick={() => setOpen(false)}
+                className="block mt-2 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-500"
+              >
+                <Phone className="w-4 h-4" />
+                Call {displayNumber}
+              </a>
             </div>
           </motion.div>
         )}

@@ -131,7 +131,7 @@ export default function About() {
       </section>
 
       {/* Team Section */}
-      {team && team.length > 0 && (
+      {Array.isArray(team) && team.length > 0 && (
         <section className="py-24 px-4 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <motion.div
@@ -186,7 +186,7 @@ export default function About() {
       )}
 
       {/* Awards Section */}
-      {awards && awards.length > 0 && (
+      {Array.isArray(awards) && awards.length > 0 && (
         <section className="py-24 px-4 bg-white">
           <div className="max-w-7xl mx-auto">
             <motion.div
