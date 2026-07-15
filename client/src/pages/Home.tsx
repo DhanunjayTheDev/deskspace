@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Sparkles, Shield, Clock, Headphones, Star, ChevronDown, Building2 } from "lucide-react";
+import { ArrowRight, Sparkles, Shield, Clock, Headphones, Star, ChevronDown, Building2, LayoutGrid, Users, MessageSquare, Mail, Calendar, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import Avatar from "boring-avatars";
 import { useState } from "react";
@@ -23,9 +23,6 @@ const formattedNumber = phoneNumber.startsWith("91") ? `+${phoneNumber}` : `+91$
 interface Partner { _id: string; name: string; logo: string; website: string; }
 interface Testimonial { _id: string; name: string; role: string; company: string; photo: string; quote: string; rating: number; }
 interface FAQ { _id: string; question: string; answer: string; }
-
-const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "919999999999";
-const formattedNumber = phoneNumber.startsWith("91") ? `+${phoneNumber}` : `+91${phoneNumber}`;
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -477,6 +474,185 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* How It Works */}
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">How It Works</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Find Your Space in 3 Steps</h2>
+            <p className="text-gray-500 mt-3 max-w-2xl mx-auto">Simple, transparent, and designed for busy professionals</p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { step: "01", title: "Search & Discover", desc: "Browse curated workspaces by city, budget, amenities, and team size. Filter to find exactly what you need.", icon: Sparkles },
+              { step: "02", title: "Compare & Connect", desc: "View photos, pricing, and availability. Direct message owners or schedule tours with one click.", icon: LayoutGrid },
+              { step: "03", title: "Book & Move In", desc: "Secure your space with flexible terms. Get keys or access codes and start working immediately.", icon: Shield },
+            ].map((item, i) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="relative bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow"
+              >
+                <div className="absolute -top-3 left-8 w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                  <span className="text-sm font-bold text-primary-600">{item.step}</span>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center mb-4">
+                  <item.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
+                <p className="text-gray-500 leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Workspace Types */}
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">Workspace Types</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Spaces for Every Need</h2>
+            <p className="text-gray-500 mt-3 max-w-2xl mx-auto">From solo desks to enterprise offices, find the perfect fit</p>
+          </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { title: "Private Offices", desc: "Lockable, furnished offices for teams of 2-50+", icon: Building2, gradient: "from-blue-500 to-blue-600", badge: "Most Popular" },
+              { title: "Dedicated Desks", desc: "Your own desk in a shared office with 24/7 access", icon: LayoutGrid, gradient: "from-purple-500 to-purple-600", badge: "Flexible" },
+              { title: "Hot Desks", desc: "First-come, first-served seating in vibrant spaces", icon: Users, gradient: "from-green-500 to-green-600", badge: "Budget-Friendly" },
+              { title: "Meeting Rooms", desc: "Hourly bookable rooms with AV, whiteboards, WiFi", icon: MessageSquare, gradient: "from-orange-500 to-orange-600", badge: "On-Demand" },
+              { title: "Virtual Offices", desc: "Business address, mail handling, call forwarding", icon: Mail, gradient: "from-pink-500 to-pink-600", badge: "Remote-First" },
+              { title: "Event Spaces", desc: "Large venues for workshops, training, networking", icon: Calendar, gradient: "from-indigo-500 to-indigo-600", badge: "Large Groups" },
+            ].map((item, i) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                className="group relative p-6 rounded-2xl bg-gray-50 border border-gray-100 hover:border-primary-200 hover:bg-white transition-all duration-300 hover:shadow-lg"
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                  <item.icon className="w-6 h-6 text-white" />
+                </div>
+                {item.badge && (
+                  <span className="absolute top-4 right-4 text-xs font-semibold text-white px-2 py-1 rounded-full bg-primary-500">{item.badge}</span>
+                )}
+                <h3 className="text-lg font-bold text-gray-900 mb-1">{item.title}</h3>
+                <p className="text-sm text-gray-500">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Cities We Serve */}
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">Our Reach</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Workspaces Across India</h2>
+            <p className="text-gray-500 mt-3 max-w-2xl mx-auto">Premium locations in major business hubs and emerging startup cities</p>
+          </motion.div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 max-w-4xl mx-auto">
+            {[
+              "Mumbai", "Delhi NCR", "Bangalore", "Hyderabad", "Pune", "Chennai",
+              "Ahmedabad", "Kolkata", "Jaipur", "Chandigarh", "Kochi", "Indore"
+            ].map((city, i) => (
+              <motion.div
+                key={city}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.03 }}
+                className="bg-white rounded-xl p-4 text-center hover:shadow-md hover:bg-primary-50 transition-all duration-300 cursor-pointer border border-gray-100"
+              >
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center mx-auto mb-2 text-white font-semibold text-sm">
+                  {city.split(' ').map(w => w[0]).join('')}
+                </div>
+                <p className="text-sm font-medium text-gray-900">{city}</p>
+                <p className="text-xs text-gray-400 mt-0.5">50+ locations</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Impact Stats */}
+      <section className="py-20 px-4 bg-white border-y border-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              { value: "1,200+", label: "Workspaces Listed", icon: Building2, color: "primary" },
+              { value: "50,000+", label: "Professionals Served", icon: Users, color: "purple" },
+              { value: "98%", label: "Customer Satisfaction", icon: Star, color: "amber" },
+              { value: "24 hrs", label: "Avg. Response Time", icon: Clock, color: "green" },
+            ].map((item, i) => (
+              <motion.div
+                key={item.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="text-center"
+              >
+                <div className={`w-16 h-16 rounded-2xl bg-${item.color}-100 flex items-center justify-center mx-auto mb-4`}>
+                  <item.icon className={`w-8 h-8 text-${item.color}-600`} />
+                </div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-1">{item.value}</div>
+                <div className="text-gray-500">{item.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className="py-20 px-4 bg-gray-900">
+        <div className="max-w-2xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Stay Updated</h2>
+            <p className="text-gray-300 mb-8">Get the latest workspace trends, new listings, and exclusive deals delivered to your inbox.</p>
+            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 px-5 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+              <button
+                type="submit"
+                className="px-8 py-3 rounded-xl bg-gradient-to-r from-primary-500 to-purple-500 text-white font-semibold hover:from-primary-600 hover:to-purple-600 transition-all shadow-lg shadow-primary-500/25"
+              >
+                Subscribe
+              </button>
+            </form>
+            <p className="text-xs text-gray-500 mt-4">No spam. Unsubscribe anytime.</p>
+          </motion.div>
+        </div>
+      </section>
 
       {/* CTA Section */}
       <section className="py-20 px-4">

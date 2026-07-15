@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useFetch } from "../hooks/useFetch";
 import { siteApi } from "../services/api";
-import { Trophy, MapPin, Users, Building2, TrendingUp } from "lucide-react";
+import { Trophy, MapPin, Users, Building2, TrendingUp, Target, Heart, Lightbulb, Globe, Award, BookOpen, Zap, Shield, Star } from "lucide-react";
 
 interface TeamMember { _id: string; name: string; role: string; bio: string; photo: string; }
 interface Award { _id: string; title: string; year: string; description: string; image: string; }
@@ -232,6 +232,131 @@ export default function About() {
           </div>
         </section>
       )}
+
+      {/* Company Values */}
+      <section className="py-24 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">Our DNA</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Values That Guide Us</h2>
+            <p className="text-gray-500 mt-3 max-w-2xl mx-auto">Every decision we make is rooted in these core principles</p>
+          </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: Target, title: "User First", desc: "Every feature, every decision starts with what's best for the people using our platform.", color: "primary" },
+              { icon: Heart, title: "Trust & Transparency", desc: "Verified listings, honest pricing, real reviews. No hidden fees, no surprises.", color: "red" },
+              { icon: Lightbulb, title: "Continuous Innovation", desc: "We constantly evolve — new tools, better matching, smarter search. Standing still isn't an option.", color: "amber" },
+              { icon: Globe, title: "Global Mindset, Local Heart", desc: "Building a worldwide network while understanding every neighborhood we serve.", color: "green" },
+            ].map((item, i) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:border-primary-200 hover:bg-white transition-all duration-300 hover:shadow-lg"
+              >
+                <div className={`w-14 h-14 rounded-2xl bg-${item.color}-100 flex items-center justify-center mb-5 text-${item.color}-600`}>
+                  <item.icon className="w-7 h-7" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
+                <p className="text-gray-500 leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Timeline/Milestones */}
+      <section className="py-24 px-4 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">Journey</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Our Story So Far</h2>
+            <p className="text-gray-500 mt-3">Key milestones that shaped who we are today</p>
+          </motion.div>
+          <div className="relative">
+            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary-200 to-purple-200" />
+            {[
+              { year: "2024", title: "Series A Funding", desc: "Raised $15M to expand across India and launch AI-powered workspace matching.", icon: TrendingUp, color: "#6366f1" },
+              { year: "2023", title: "1000+ Workspaces", desc: "Crossed 1,000 verified workspace listings across 50+ Indian cities.", icon: Building2, color: "#a855f7" },
+              { year: "2022", title: "Mobile App Launch", desc: "Released iOS and Android apps with instant booking and virtual tours.", icon: Zap, color: "#f59e0b" },
+              { year: "2021", title: "Platform V2", desc: "Rebuilt from ground up with verified listings, reviews, and smart recommendations.", icon: Lightbulb, color: "#22c55e" },
+              { year: "2020", title: "Founded", desc: "Started with a mission to make finding workspace as easy as booking a hotel.", icon: Star, color: "#3b82f6" },
+            ].map((item, i) => (
+              <motion.div
+                key={item.year}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="relative pl-20 pb-12 last:pb-0"
+              >
+                <div className="absolute left-4 top-1 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center z-10" style={{ backgroundColor: item.color }}>
+                  <item.icon className="w-4 h-4 text-white" />
+                </div>
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-sm font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded-full">{item.year}</span>
+                    <h3 className="text-lg font-bold text-gray-900">{item.title}</h3>
+                  </div>
+                  <p className="text-gray-500">{item.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why DeskSpace */}
+      <section className="py-24 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">Difference</span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Why Choose DeskSpace?</h2>
+            <p className="text-gray-500 mt-3 max-w-2xl mx-auto">We're not just another listing platform — we're your partner in finding the perfect workspace</p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: Shield, title: "100% Verified", desc: "Every space personally vetted by our team. No fake listings, no surprises.", badge: "Trust" },
+              { icon: Zap, title: "Instant Access", desc: "Book tours, negotiate terms, and get keys in hours — not weeks.", badge: "Speed" },
+              { icon: Heart, title: "Dedicated Support", desc: "Real humans helping you every step. From search to move-in day.", badge: "Care" },
+              { icon: TrendingUp, title: "Flexible Terms", desc: "Month-to-month, yearly, or custom. Scale up or down as you grow.", badge: "Freedom" },
+            ].map((item, i) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="relative p-6 rounded-2xl bg-gray-50 border border-gray-100 hover:border-primary-200 hover:bg-white transition-all duration-300 hover:shadow-xl"
+              >
+                <span className="absolute -top-3 left-6 px-3 py-1 text-xs font-bold text-white bg-primary-500 rounded-full">{item.badge}</span>
+                <div className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center mb-4 text-primary-600">
+                  <item.icon className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
+                <p className="text-gray-500 leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* CTA */}
       <section className="py-24 px-4 bg-gradient-to-br from-primary-600 to-purple-600 relative overflow-hidden">
