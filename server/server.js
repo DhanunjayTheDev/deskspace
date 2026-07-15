@@ -8,7 +8,8 @@ const { addClient, removeClient } = require("./sseManager");
 const app = express();
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [process.env.CLIENT_URL, process.env.ADMIN_URL].filter(Boolean);
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
