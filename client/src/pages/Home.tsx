@@ -11,7 +11,7 @@ import LogoLoop from "../components/LogoLoop";
 // @ts-ignore
 import CircularText from "../components/CircularText";
 // @ts-ignore
-import RotatingText from "../components/RotatingText";
+import Typewriter from "../components/Typewriter";
 import { useFetch } from "../hooks/useFetch";
 import { workspaceApi, siteApi } from "../services/api";
 
@@ -123,7 +123,7 @@ export default function Home() {
                 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight flex flex-wrap items-center gap-3"
               >
                 <span>Find Your Perfect</span>
-                <RotatingText
+                <Typewriter
                   texts={[
                     "Private Office",
                     "Meeting Rooms",
@@ -131,11 +131,10 @@ export default function Home() {
                     "Virtual Office",
                     "Training Room",
                   ]}
-                  mainClassName="bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 bg-clip-text text-transparent inline-block"
-                  elementLevelClassName="bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 bg-clip-text text-transparent"
-                  rotationInterval={3000}
-                  splitBy="characters"
-                  staggerDuration={0.02}
+                  className="bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 bg-clip-text text-transparent"
+                  typeSpeed={80}
+                  deleteSpeed={40}
+                  pauseDuration={2000}
                 />
               </motion.h1>
 
@@ -213,12 +212,12 @@ export default function Home() {
               {/* Center circular design */}
               <motion.div
                 animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, linear: true }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                 className="absolute w-96 h-96 rounded-full border-2 border-primary-200/30 flex items-center justify-center"
               >
                 <motion.div
                   animate={{ rotate: -360 }}
-                  transition={{ duration: 20, repeat: Infinity, linear: true }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                   className="w-72 h-72 rounded-full border-2 border-purple-200/30 flex items-center justify-center"
                 >
                   <div className="w-48 h-48 rounded-full bg-gradient-to-br from-primary-100 to-purple-100 flex items-center justify-center shadow-lg">
@@ -259,7 +258,7 @@ export default function Home() {
               <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none z-10" />
               
               <LogoLoop
-                logos={partners.map((p) => ({
+                logos={(Array.isArray(partners) ? partners : []).map((p) => ({
                   _id: p._id,
                   src: p.logo,
                   alt: p.name,
@@ -310,7 +309,7 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading
               ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-              : featured?.slice(0, 6).map((w, i) => (
+              : (Array.isArray(featured) ? featured : []).slice(0, 6).map((w, i) => (
                   <motion.div
                     key={w._id}
                     initial={{ opacity: 0, y: 30 }}
@@ -354,7 +353,7 @@ export default function Home() {
               <p className="text-gray-500 mt-2">Hear from professionals who found their perfect workspace</p>
             </motion.div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {testimonials.map((t, i) => (
+              {(Array.isArray(testimonials) ? testimonials : []).map((t, i) => (
                 <motion.div
                   key={t._id}
                   initial={{ opacity: 0, y: 30 }}
@@ -435,7 +434,7 @@ export default function Home() {
               <p className="text-gray-500 mt-2">Everything you need to know about workspace booking</p>
             </motion.div>
             <div className="space-y-3">
-              {faqs.map((f, i) => (
+              {(Array.isArray(faqs) ? faqs : []).map((f, i) => (
                 <motion.div
                   key={f._id}
                   initial={{ opacity: 0, y: 10 }}
