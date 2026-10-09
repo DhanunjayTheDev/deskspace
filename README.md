@@ -1,4 +1,4 @@
-# DeskSpace
+# deskplace
 
 A full-stack workspace broker platform with admin dashboard. Admins upload workspace listings, users discover and enquire via WhatsApp, and leads are tracked in real-time.
 
@@ -7,7 +7,7 @@ A full-stack workspace broker platform with admin dashboard. Admins upload works
 ## 🏗️ Architecture
 
 ```
-deskspace/
+deskplace/
 ├── client/        (User website - React Vite)
 ├── admin/         (Admin dashboard - React Vite)
 ├── server/        (Express API)
@@ -28,7 +28,7 @@ deskspace/
 
 **Server** (`server/.env`):
 ```bash
-MONGO_URI=mongodb://localhost:27017/deskspace
+MONGO_URI=mongodb://localhost:27017/deskplace
 PORT=5000
 JWT_SECRET=your_super_secret_key_change_this_in_production
 CLOUDINARY_CLOUD_NAME=your_cloud_name
@@ -58,7 +58,7 @@ npm run dev
 
 # 2. Seed sample data (in another terminal)
 node seed.js
-# Creates 6 sample workspaces + default admin (admin@deskspace.in / admin123)
+# Creates 6 sample workspaces + default admin (admin@deskplace.in / admin123)
 
 # 3. Client (in another terminal)
 cd ../client
@@ -72,7 +72,7 @@ npm install
 npm run dev
 # Runs on http://localhost:3001
 
-# Login: admin@deskspace.in / admin123
+# Login: admin@deskplace.in / admin123
 ```
 
 ---
@@ -81,18 +81,18 @@ npm run dev
 
 ### **User Website** (Client)
 
-- 🏠 **Hero + Featured Workspaces** — Animated home with search
-- 🔍 **Smart Filtering** — Filter by area, seats, budget
-- 🎯 **Workspace Details** — Image carousel, amenities, pricing
-- 💬 **WhatsApp Lead Capture** — Submit enquiry → Auto-send to WhatsApp
-- ⚡ **Performance** — <1s load, lazy-loaded components
+- 🏠 **Hero + Featured Workspaces** Animated home with search
+- 🔍 **Smart Filtering** Filter by area, seats, budget
+- 🎯 **Workspace Details** Image carousel, amenities, pricing
+- 💬 **WhatsApp Lead Capture** Submit enquiry → Auto-send to WhatsApp
+- ⚡ **Performance** <1s load, lazy-loaded components
 
 ### **Admin Dashboard** (Admin)
 
-- 📊 **Dashboard** — Total leads, new leads today, conversion rate
-- 🏢 **Workspace Management** — Add/edit/delete, upload images, featur­ed toggle
-- 📞 **Lead Management** — Track status, add notes, view conversions
-- 🔐 **JWT Auth** — Secure login, token-based sessions
+- 📊 **Dashboard** Total leads, new leads today, conversion rate
+- 🏢 **Workspace Management** Add/edit/delete, upload images, featur­ed toggle
+- 📞 **Lead Management** Track status, add notes, view conversions
+- 🔐 **JWT Auth** Secure login, token-based sessions
 
 ### **Backend API** (Server)
 
@@ -111,14 +111,14 @@ npm run dev
 | Method | Endpoint | Body | Response |
 |---|---|---|---|
 | POST | `/api/admin/login` | `{email, password}` | `{token, admin}` |
-| GET | `/api/admin/me` | — | `{admin object}` |
+| GET | `/api/admin/me` | | `{admin object}` |
 
 ### **Workspaces** (Public)
 
 | Method | Endpoint | Query Params |
 |---|---|---|
 | GET | `/api/workspaces` | `?area=&minSeats=&maxBudget=&city=&featured=true` |
-| GET | `/api/workspaces/:id` | — |
+| GET | `/api/workspaces/:id` | |
 
 ### **Workspaces** (Admin Only)
 
@@ -225,7 +225,7 @@ admin/
 ### Default Admin Credentials (Change in Production!)
 
 ```
-Email:    admin@deskspace.in
+Email:    admin@deskplace.in
 Password: admin123
 ```
 
@@ -261,7 +261,7 @@ Update before deploying:
 
 ```bash
 JWT_SECRET=long_random_string_at_least_32_chars
-MONGO_URI=mongodb+srv://user:password@cluster.mongodb.net/deskspace
+MONGO_URI=mongodb+srv://user:password@cluster.mongodb.net/deskplace
 CLOUDINARY_CLOUD_NAME=...
 CLOUDINARY_API_KEY=...
 CLOUDINARY_API_SECRET=...
@@ -274,7 +274,7 @@ CLOUDINARY_API_SECRET=...
 ### **Test Admin Panel**
 
 1. Navigate to `http://localhost:3001/login`
-2. Login with `admin@deskspace.in` / `admin123`
+2. Login with `admin@deskplace.in` / `admin123`
 3. Add a workspace → Upload images → Toggle featured
 4. View leads in real-time
 
@@ -347,7 +347,7 @@ Modify Tailwind config in `client/tailwind.config.js` and `admin/tailwind.config
 
 ## 📄 License
 
-MIT — Feel free to use & customize!
+MIT Feel free to use & customize!
 
 ---
 

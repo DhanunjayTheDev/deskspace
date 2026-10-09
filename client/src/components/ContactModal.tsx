@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, User, Phone, Users, Loader2, MessageCircle, Building2 } from "lucide-react";
+import { Building2, Loader2, Phone, User, Users } from "lucide-react";
+import WhatsAppIcon from "./icons/WhatsAppIcon";
 import { leadApi } from "../services/api";
 import type { Workspace } from "../types/workspace";
 import CustomSelect from "./CustomSelect";
+import Sheet from "./ui/Sheet";
+import Button from "./ui/Button";
+import { cn } from "../lib/utils";
 
 interface Props {
   workspace: Workspace;
@@ -12,7 +15,17 @@ interface Props {
   whatsappNumber: string;
 }
 
-export default function ContactModal({ workspace, isOpen, onClose, whatsappNumber }: Props) {
+const inputClass =
+  "h-12 w-full rounded-xl border border-line-strong bg-surface pl-10 pr-3 text-sm text-fg " +
+  "placeholder:text-subtle transition-colors duration-160 ease-out " +
+  "md:hover:border-line-strong focus-visible:border-brand";
+
+export default function ContactModal({
+  workspace,
+  isOpen,
+  onClose,
+  whatsappNumber,
+}: Props) {
   const [form, setForm] = useState({ name: "", phone: "", seats: "", type: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -21,13 +34,12 @@ export default function ContactModal({ workspace, isOpen, onClose, whatsappNumbe
     e.preventDefault();
     setError("");
 
-    if (!form.name.trim() || !form.phone.trim() || !form.seats.trim() || !form.type.trim()) {
-      setError("All fields are required");
+    if (!form.name.trim() || !form.phone.trim() || !form.seats.trim()) {
+      setError("Name, phone and seats are required.");
       return;
     }
-
     if (!/^\d{10}$/.test(form.phone.trim())) {
-      setError("Enter a valid 10-digit phone number");
+      setError("Enter a valid 10-digit phone number.");
       return;
     }
 
@@ -42,16 +54,25 @@ export default function ContactModal({ workspace, isOpen, onClose, whatsappNumbe
         seatsRequired: Number(form.seats),
       });
 
-      // Build WhatsApp message
-      const message = `Hi, I am interested in:\nWorkspace: ${workspace.title}\nArea: ${workspace.area}\nType: ${form.type.trim()}\nSeats: ${form.seats}\nName: ${form.name.trim()}\nPhone: ${form.phone.trim()}`;
-      const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+      const message = [
+        "Hi, I am interested in:",
+        `Workspace: ${workspace.title}`,
+        `Area: ${workspace.area}, ${workspace.city}`,
+        form.type ? `Type: ${form.type}` : null,
+        `Seats: ${form.seats}`,
+        `Name: ${form.name.trim()}`,
+        `Phone: ${form.phone.trim()}`,
+      ]
+        .filter(Boolean)
+        .join("\n");
 
-      // Reset form and close
       setForm({ name: "", phone: "", seats: "", type: "" });
       onClose();
-
-      // Open WhatsApp
-      window.open(waUrl, "_blank", "noopener,noreferrer");
+      window.open(
+        `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -60,122 +81,125 @@ export default function ContactModal({ workspace, isOpen, onClose, whatsappNumbe
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+    <Sheet
+      open={isOpen}
+      onClose={onClose}
+      title="Get in touch"
+      description="We'll continue the conversation on WhatsApp."
+      footer={
+        <Button
+          variant="success"
+          fullWidth
+          size="lg"
+          disabled={loading}
+          onClick={handleSubmit}
+        >
+          {loading ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <>
+              <WhatsAppIcon className="h-5 w-5" />
+              Continue on WhatsApp
+            </>
+          )}
+        </Button>
+      }
+    >
+      <div className="mb-4 rounded-xl bg-sunken p-3">
+        <p className="line-clamp-1 text-sm font-semibold text-fg">
+          {workspace.title}
+        </p>
+        <p className="mt-0.5 line-clamp-1 text-xs text-muted">
+          {workspace.area}, {workspace.city} · ₹
+          {workspace.pricePerSeat.toLocaleString("en-IN")}/seat
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="relative">
+          <User
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle"
+            aria-hidden="true"
           />
+          <input
+            type="text"
+            autoComplete="name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="Your name"
+            aria-label="Your name"
+            className={inputClass}
+          />
+        </div>
 
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: "spring", duration: 0.3 }}
-            className="fixed z-50 inset-0 flex items-center justify-center p-4"
+        <div className="relative">
+          <Phone
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle"
+            aria-hidden="true"
+          />
+          <input
+            type="tel"
+            inputMode="numeric"
+            autoComplete="tel-national"
+            value={form.phone}
+            onChange={(e) =>
+              setForm({ ...form, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })
+            }
+            placeholder="10-digit phone number"
+            aria-label="Phone number"
+            className={inputClass}
+          />
+        </div>
+
+        <div className="relative">
+          <Users
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle"
+            aria-hidden="true"
+          />
+          <input
+            type="number"
+            inputMode="numeric"
+            min={1}
+            value={form.seats}
+            onChange={(e) => setForm({ ...form, seats: e.target.value })}
+            placeholder="Seats required"
+            aria-label="Seats required"
+            className={inputClass}
+          />
+        </div>
+
+        {workspace.type?.length > 0 && (
+          <CustomSelect
+            value={form.type}
+            onChange={(val) => setForm({ ...form, type: val })}
+            options={workspace.type}
+            placeholder="Workspace type (optional)"
+            label="Workspace type"
+            icon={<Building2 className="h-4 w-4" />}
+          />
+        )}
+
+        {error && (
+          <p
+            role="alert"
+            className={cn(
+              "rounded-xl bg-red-50 px-3 py-2.5 text-sm font-medium text-red-700",
+              "motion-safe:pop-in"
+            )}
           >
-            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 relative">
-              {/* Close button */}
-              <button
-                onClick={onClose}
-                className="absolute top-4 right-4 p-2 rounded-xl hover:bg-gray-100 transition-colors"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5 text-gray-400" />
-              </button>
+            {error}
+          </p>
+        )}
 
-              {/* Header */}
-              <div className="mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mb-4">
-                  <MessageCircle className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900">Get in Touch</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  Fill in your details and we'll connect you on WhatsApp
-                </p>
-              </div>
+        {/* Submits on Enter; the visible button lives in the sheet footer. */}
+        <button type="submit" className="sr-only" tabIndex={-1} aria-hidden="true">
+          Submit
+        </button>
+      </form>
 
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Your Name"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all"
-                    required
-                  />
-                </div>
-
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
-                    placeholder="Phone Number (10 digits)"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all"
-                    required
-                  />
-                </div>
-
-                <div className="relative">
-                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="number"
-                    value={form.seats}
-                    onChange={(e) => setForm({ ...form, seats: e.target.value })}
-                    placeholder="Seats Required"
-                    min={1}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all"
-                    required
-                  />
-                </div>
-
-                {workspace.type && workspace.type.length > 0 && (
-                  <div className="relative">
-                    <CustomSelect
-                      value={form.type}
-                      onChange={(val) => setForm({ ...form, type: val })}
-                      options={workspace.type}
-                      placeholder="Select Workspace Type"
-                      icon={<Building2 className="w-4 h-4" />}
-                      triggerClassName="py-3 bg-gray-50"
-                    />
-                  </div>
-                )}
-
-                {error && (
-                  <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-xl">{error}</p>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg shadow-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <>
-                      <MessageCircle className="w-4 h-4" />
-                      Contact on WhatsApp
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+      <p className="mt-4 text-center text-xs text-subtle">
+        Free consultation · No commitment
+      </p>
+    </Sheet>
   );
 }

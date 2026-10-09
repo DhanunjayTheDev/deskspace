@@ -28,7 +28,7 @@ export default function Sidebar() {
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center">
           <Building2 className="w-4 h-4 text-white" />
         </div>
-        <span className="text-lg font-bold text-gray-900">DeskSpace</span>
+        <span className="text-lg font-bold text-gray-900">deskplace</span>
       </div>
 
       {/* Navigation */}
@@ -77,7 +77,7 @@ export default function Sidebar() {
           <div className="w-7 h-7 rounded-md bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center">
             <Building2 className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="font-bold text-gray-900">DeskSpace</span>
+          <span className="font-bold text-gray-900">deskplace</span>
         </div>
       </div>
 

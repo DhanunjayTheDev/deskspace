@@ -15,7 +15,7 @@ const transformations = {
 
 router.post("/", auth, (req, res) => {
   const type = req.query.type || "default";
-  const folder = type === "default" ? "deskspace" : `deskspace/${type}`;
+  const folder = type === "default" ? "deskplace" : `deskplace/${type}`;
   const transformation = transformations[type] || transformations.default;
 
   const storage = new CloudinaryStorage({

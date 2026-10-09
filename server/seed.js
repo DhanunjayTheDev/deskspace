@@ -123,7 +123,7 @@ const sampleTestimonials = [
     name: "Vikram Sharma",
     role: "Founder",
     company: "TechStart India",
-    quote: "DeskSpace made finding the right workspace effortless. From inquiry to booking within 24 hours!",
+    quote: "deskplace made finding the right workspace effortless. From inquiry to booking within 24 hours!",
     photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
     rating: 5,
     isActive: true,
@@ -184,7 +184,7 @@ const samplePartners = [
 
 const sampleFAQs = [
   {
-    question: "How can I book a workspace on DeskSpace?",
+    question: "How can I book a workspace on deskplace?",
     answer: "Browse workspaces, filter by location & type, select your preferred space, and submit an inquiry. Our team will connect you with the workspace owner within 24 hours.",
     isActive: true,
     order: 1,
@@ -219,7 +219,7 @@ const sampleTeamMembers = [
   {
     name: "Arjun Verma",
     role: "CEO & Co-Founder",
-    bio: "Visionary entrepreneur with 15+ years in workplace solutions. Built DeskSpace to revolutionize workspace booking.",
+    bio: "Visionary entrepreneur with 15+ years in workplace solutions. Built deskplace to revolutionize workspace booking.",
     photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop",
     isActive: true,
     order: 1,
@@ -314,8 +314,8 @@ async function seed() {
   console.log(`✓ Seeded ${awards.length} awards`);
 
   // Create default admin
-  await Admin.create({ email: "admin@deskspace.in", password: "admin123" });
-  console.log("✓ Default admin created: admin@deskspace.in / admin123");
+  await Admin.create({ email: "admin@deskplace.in", password: "admin123" });
+  console.log("✓ Default admin created: admin@deskplace.in / admin123");
 
   console.log("\n✅ Database seeding completed successfully!");
   await mongoose.connection.close();

@@ -1,29 +1,40 @@
-import { useState, useMemo, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { SearchX } from "lucide-react";
 import WorkspaceCard from "../components/WorkspaceCard";
 import SkeletonCard from "../components/SkeletonCard";
-import Filters, { type FilterValues } from "../components/Filters";
-// @ts-ignore
-import RotatingText from "../components/RotatingText";
+import Filters, { EMPTY_FILTERS, type FilterValues } from "../components/Filters";
+import Reveal from "../components/ui/Reveal";
+import Button from "../components/ui/Button";
 import { useFetch } from "../hooks/useFetch";
 import { workspaceApi, type WorkspaceFilters } from "../services/api";
 
 export default function Workspaces() {
-  const [searchParams] = useSearchParams();
-  const initialArea = searchParams.get("area") || "";
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [filters, setFilters] = useState<FilterValues>({
-    city: "",
-    area: initialArea,
-    type: "",
-    minSeats: "",
-    maxBudget: "",
-  });
+  // The URL is the source of truth, so a shared link or a back navigation
+  // restores exactly the result set the person was looking at.
+  const [filters, setFilters] = useState<FilterValues>(() => ({
+    q: searchParams.get("q") || "",
+    area: searchParams.get("area") || "",
+    type: searchParams.get("type") || "",
+    minSeats: searchParams.get("seats") || "",
+    maxBudget: searchParams.get("budget") || "",
+  }));
+
+  useEffect(() => {
+    const next = new URLSearchParams();
+    if (filters.q) next.set("q", filters.q);
+    if (filters.area) next.set("area", filters.area);
+    if (filters.type) next.set("type", filters.type);
+    if (filters.minSeats) next.set("seats", filters.minSeats);
+    if (filters.maxBudget) next.set("budget", filters.maxBudget);
+    setSearchParams(next, { replace: true });
+  }, [filters, setSearchParams]);
 
   const apiFilters: WorkspaceFilters = useMemo(() => {
     const f: WorkspaceFilters = {};
-    if (filters.city) f.city = filters.city;
+    if (filters.q) f.q = filters.q;
     if (filters.area) f.area = filters.area;
     if (filters.type) f.type = filters.type;
     if (filters.minSeats) f.minSeats = Number(filters.minSeats);
@@ -31,83 +42,95 @@ export default function Workspaces() {
     return f;
   }, [filters]);
 
-  const { data: workspaces, loading } = useFetch(
+  const { data: results, loading } = useFetch(
     () => workspaceApi.getAll(apiFilters),
-    [apiFilters.city, apiFilters.area, apiFilters.type, apiFilters.minSeats, apiFilters.maxBudget]
+    [
+      apiFilters.q,
+      apiFilters.area,
+      apiFilters.type,
+      apiFilters.minSeats,
+      apiFilters.maxBudget,
+    ]
   );
 
-  const handleFilterChange = useCallback((f: FilterValues) => {
-    setFilters(f);
-  }, []);
+  const handleChange = useCallback((f: FilterValues) => setFilters(f), []);
+  const count = results?.length ?? 0;
+  const hasFilters = Object.values(filters).some(Boolean);
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-8"
-        >
-          <h1 className="text-3xl font-bold text-gray-900 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-            <span>Find Your Perfect</span>
-            <RotatingText
-              texts={[
-                "Private Office",
-                "Meeting Rooms",
-                "Dedicated Desks",
-                "Virtual Office",
-                "Training Room",
-              ]}
-              mainClassName="text-primary-600 inline-block"
-              elementLevelClassName="text-primary-600"
-              rotationInterval={3000}
-              splitBy="characters"
-              staggerDuration={0.02}
-            />
+    <div className="pt-header px-safe">
+      <div className="mx-auto max-w-content px-4 pb-16 sm:px-6 lg:px-8">
+        <header className="py-6 sm:py-9">
+          <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-fg sm:text-4xl lg:text-5xl">
+            Workspaces in Hyderabad
           </h1>
-          <p className="text-gray-500 mt-2">Find the perfect space for your team</p>
-        </motion.div>
+          <p className="mt-2 text-base text-muted sm:text-lg">
+            Private offices, desks and meeting rooms across the city all verified.
+          </p>
+        </header>
 
-        {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="mb-8 p-4 bg-white rounded-2xl shadow-card"
-        >
-          <Filters filters={filters} onChange={handleFilterChange} />
-        </motion.div>
-
-        {/* Results */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading
-            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-            : workspaces?.map((w, i) => (
-                <motion.div
-                  key={w._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05, duration: 0.3 }}
-                >
-                  <WorkspaceCard workspace={w} />
-                </motion.div>
-              ))}
+        {/* Sticky on phones so the filter control is always one tap away while
+            scrolling a long result list. */}
+        <div className="sticky top-header z-30 -mx-4 mb-6 border-b border-line bg-white/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:mb-8 md:rounded-2xl md:border md:border-line md:bg-surface md:p-5 md:backdrop-blur-none">
+          <Filters filters={filters} onChange={handleChange} />
         </div>
 
-        {!loading && workspaces && workspaces.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
-            <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-gray-100 flex items-center justify-center">
-              <span className="text-3xl">🏢</span>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No workspaces found</h3>
-            <p className="text-gray-500">Try adjusting your filters or search criteria</p>
-          </motion.div>
+        <div
+          className="mb-5 flex items-center justify-between gap-4"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <p className="text-sm text-muted">
+            {loading
+              ? "Finding spaces…"
+              : `${count} ${count === 1 ? "space" : "spaces"} available`}
+          </p>
+          {hasFilters && !loading && (
+            <button
+              onClick={() => setFilters(EMPTY_FILTERS)}
+              className="press text-sm font-semibold text-brand-soft-fg md:hidden"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : count > 0 ? (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+            {results!.map((w, i) => (
+              <Reveal key={w._id} index={Math.min(i, 3)}>
+                <WorkspaceCard workspace={w} />
+              </Reveal>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center px-6 py-14 text-center sm:py-20">
+            <span className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-elevated text-subtle">
+              <SearchX className="h-8 w-8" aria-hidden="true" />
+            </span>
+            <h2 className="text-xl font-bold tracking-tight text-fg">
+              No workspaces found
+            </h2>
+            <p className="mt-2 max-w-sm text-muted">
+              Nothing matches these filters yet. Try widening the budget or clearing the
+              area.
+            </p>
+            {hasFilters && (
+              <Button
+                variant="outline"
+                className="mt-6"
+                onClick={() => setFilters(EMPTY_FILTERS)}
+              >
+                Clear all filters
+              </Button>
+            )}
+          </div>
         )}
       </div>
     </div>

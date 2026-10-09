@@ -1,59 +1,584 @@
-@import "tw-animate-css";
-@import "@fontsource-variable/geist";
+/* Typefaces load from the <link> in index.html so they start fetching before
+   this stylesheet is even parsed. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   Tokens
+   Motion curves are the strong custom variants the built-in CSS easings are
+   too weak to read as intentional. Durations stay under 300ms for anything the
+   user triggers directly.
+   ========================================================================== */
 :root {
-  --gradient-brand: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --dur-press: 140ms;
+  --dur-tooltip: 140ms;
+  --dur-menu: 200ms;
+  --dur-sheet: 320ms;
+
+  /* The header is a floating pill, so pages must clear its height *and* the
+     gap above it on both sides. */
+  --nav-h: 3.25rem;
+  --nav-gap: 0.625rem;
+  /* Dock panel (62px) plus its bottom inset. */
+  --tabbar-h: 4.5rem;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* --- Light theme -------------------------------------------------------
+     Royal blue on a cool neutral. Channel triples so Tailwind's `/opacity`
+     modifiers keep working, and so the dark theme below is a single block
+     instead of a `dark:` class on every element. */
+  --surface: 255 255 255;
+  --sunken: 246 248 251;
+  --elevated: 239 242 247;
+  --fg: 15 23 42;
+  --muted: 92 105 128;
+  --subtle: 138 150 170;
+  --line: 227 232 240;
+  --line-strong: 205 213 227;
+  --brand: 37 86 235;
+  --brand-hover: 29 67 216;
+  --brand-soft: 239 245 255;
+  --brand-soft-fg: 29 67 216;
+  --shadow: 15 23 42;
+
+  --bar: 255 255 255;
+  color-scheme: light;
 }
 
-body {
-  @apply bg-gray-50 text-gray-900 font-sans;
-}
+.dark {
+  /* Lifted off pure black: true black makes elevation impossible to read and
+     smears on OLED while scrolling. */
+  --surface: 17 24 39;
+  --sunken: 11 17 30;
+  --elevated: 30 41 59;
+  --fg: 241 245 249;
+  --muted: 160 173 193;
+  --subtle: 122 135 156;
+  --line: 35 46 66;
+  --line-strong: 51 65 88;
+  --brand: 96 149 250;
+  --brand-hover: 147 187 253;
+  --brand-soft: 27 39 66;
+  --brand-soft-fg: 147 187 253;
+  --shadow: 0 0 0;
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  @apply bg-gray-100;
-}
-::-webkit-scrollbar-thumb {
-  @apply bg-primary-300 rounded-full;
-}
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-primary-400;
-}
-
-/* Skeleton animation */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.skeleton {
-  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
+  --bar: 17 24 39;
+  color-scheme: dark;
 }
 
 @layer base {
-  .theme {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
-  }
   html {
-    font-family: 'Geist Variable', sans-serif;
+    font-family: "Archivo", system-ui, -apple-system, sans-serif;
+    /* Stops iOS inflating text when the device rotates. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Scroll chaining into the browser chrome reads as "this is a web page". */
+    overscroll-behavior-y: contain;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface text-fg font-sans;
+    /* Only the theme swap animates, not every colour change during it. */
+    transition: background-color 250ms var(--ease-out), color 250ms var(--ease-out);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* No blue flash on tap the app supplies its own press feedback. */
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: contain;
+    /* Never let a wide child scroll the whole page sideways. */
+    overflow-x: hidden;
+  }
+
+  /* Removes the ~300ms tap delay without disabling pinch zoom. */
+  a,
+  button,
+  [role="button"],
+  input,
+  label,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+
+  /* Long-pressing a control shouldn't select its label like body copy. */
+  button,
+  [role="button"],
+  nav a,
+  label {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* iOS zooms the viewport when a focused field is under 16px. */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+  @screen sm {
+    input,
+    select,
+    textarea {
+      font-size: 0.875rem;
+    }
+  }
+
+  /* iOS strips its default control chrome only when told to. */
+  input,
+  textarea,
+  select,
+  button {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0;
+  }
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+  /* Number fields: drop the spinners, they're unusable on touch. */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Visible only for keyboard users, so press states stay clean on touch. */
+  :focus-visible {
+    outline: 2px solid theme("colors.primary.600");
+    outline-offset: 2px;
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  img {
+    /* Stops the drag-ghost on desktop and the callout sheet on iOS. */
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Instrument Serif has a single weight and generous default spacing; display
+     type wants it pulled tight and set large to show the stroke contrast. */
+  .font-display {
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+
+  /* Every figure in the app is tabular, so columns of prices and seat counts
+     line up and a counting number never shifts its own label. */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-/* Safe area for iPhone notch / home indicator */
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+@layer utilities {
+  /* --- Viewport height that survives the mobile URL bar --------------------- */
+  .min-h-screen-d {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  .h-screen-d {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  /* --- Safe areas ---------------------------------------------------------- */
+  .pt-safe {
+    padding-top: var(--safe-top);
+  }
+  .pb-safe {
+    padding-bottom: var(--safe-bottom);
+  }
+  .px-safe {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  .mt-safe {
+    margin-top: var(--safe-top);
+  }
+  /* Clears the fixed mobile tab bar. */
+  .pb-tabbar {
+    padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom));
+  }
+  /* Clears the floating header: notch + gap + pill + gap. */
+  .pt-header {
+    padding-top: calc(var(--safe-top) + var(--nav-gap) * 2 + var(--nav-h));
+  }
+  @screen md {
+    .pt-header {
+      padding-top: calc(var(--safe-top) + var(--nav-gap) * 2 + 3.5rem);
+    }
+  }
+  /* For sticky elements that must sit below the header. */
+  .top-header {
+    top: calc(var(--safe-top) + var(--nav-gap) * 2 + var(--nav-h));
+  }
+  @screen md {
+    .top-header {
+      top: calc(var(--safe-top) + var(--nav-gap) * 2 + 3.5rem);
+    }
+  }
+  /* Same offset plus breathing room, for sticky sidebars. */
+  .top-header-gap {
+    top: calc(var(--safe-top) + var(--nav-gap) * 2 + var(--nav-h) + 1rem);
+  }
+  @screen md {
+    .top-header-gap {
+      top: calc(var(--safe-top) + var(--nav-gap) * 2 + 3.5rem + 1rem);
+    }
+  }
+  /* Same as pt-header, as a margin — for a full-bleed block (the detail-page
+     gallery) that needs to sit below the floating pill rather than under it. */
+  .mt-header {
+    margin-top: calc(var(--safe-top) + var(--nav-gap) * 2 + var(--nav-h));
+  }
+  @screen md {
+    .mt-header {
+      margin-top: calc(var(--safe-top) + var(--nav-gap) * 2 + 3.5rem);
+    }
+  }
+
+  /* --- Press feedback ------------------------------------------------------
+     Instant confirmation that the interface heard the tap. Subtle by design;
+     `transform` only, so it never triggers layout. */
+  .press {
+    transition: transform var(--dur-press) var(--ease-out);
+  }
+  .press:active {
+    transform: scale(0.97);
+  }
+  .press-sm:active {
+    transform: scale(0.98);
+  }
+  .press-lg:active {
+    transform: scale(0.95);
+  }
+  .press-sm,
+  .press-lg {
+    transition: transform var(--dur-press) var(--ease-out);
+  }
+
+  /* --- Hover, gated -------------------------------------------------------
+     Touch devices fire :hover on tap and leave it stuck. Anything decorative
+     that keys off hover belongs behind this. */
+  @media (hover: hover) and (pointer: fine) {
+    .hover-lift {
+      transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+    }
+    .hover-lift:hover {
+      transform: translateY(-2px);
+    }
+    .hover-zoom img {
+      transition: transform 400ms var(--ease-out);
+    }
+    .hover-zoom:hover img {
+      transform: scale(1.04);
+    }
+  }
+
+  /* --- Horizontal snap carousels (native-feeling swipe) -------------------- */
+  .snap-row {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    /* Keeps a flick inside the carousel instead of bouncing the page. */
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .snap-row::-webkit-scrollbar {
+    display: none;
+  }
+  .snap-item {
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Bleeds a row to the screen edge inside a padded container, so cards look
+     like they run off-screen the way they do in a native list. */
+  .edge-bleed {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .tap-transparent {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ==========================================================================
+   Components
+   ========================================================================== */
+@layer components {
+  /* Vertical rhythm between page sections.
+     Phones get roughly half the desktop gap: on a small screen a 64px band of
+     empty space above and below every section turns the page into scrolling
+     through nothing. Tuned here so every section stays in step. */
+  .section-y {
+    padding-top: 2.25rem;
+    padding-bottom: 2.25rem;
+  }
+  @screen sm {
+    .section-y {
+      padding-top: 3.5rem;
+      padding-bottom: 3.5rem;
+    }
+  }
+  @screen lg {
+    .section-y {
+      padding-top: 5rem;
+      padding-bottom: 5rem;
+    }
+  }
+
+  /* Paper grain. A fixed, non-interactive film over the whole page — it is what
+     stops the warm flats reading as plastic. Generated inline as SVG noise, so
+     it costs no request and scales to any viewport. */
+  .grain::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .dark .grain::after {
+    opacity: 0.06;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    /* No animation on the grain — a moving film is nausea-inducing and it is
+       the sort of effect that reads as a broken screen, not texture. */
+  }
+
+  /* Replaces the two `animate-in` utilities that came from tw-animate-css,
+     which is no longer a dependency. */
+  .pop-in {
+    animation: pop-in 200ms var(--ease-out) both;
+  }
+
+  /* Solid two-tone pulse. A shimmer sweep would need a gradient. */
+  .skeleton {
+    @apply bg-elevated;
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+  }
+
+  /* Reveals a heading one line at a time from behind its own edge. Each line
+     needs its own clipping box, hence the wrapper + child pairing. */
+  .line-clip {
+    display: block;
+    overflow: hidden;
+  }
+  .line-clip > span {
+    display: block;
+    transform: translateY(105%);
+    transition: transform 700ms var(--ease-out);
+  }
+  .is-shown .line-clip > span {
+    transform: translateY(0);
+  }
+
+  /* Frosted bars. Backdrop blur is the one "material" effect kept, and it
+     degrades to a solid surface where it isn't supported. */
+  .bar-blur {
+    background-color: rgb(var(--bar) / 0.92);
+  }
+  @supports (backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px)) {
+    .bar-blur {
+      background-color: rgb(var(--bar) / 0.72);
+      -webkit-backdrop-filter: saturate(180%) blur(16px);
+      backdrop-filter: saturate(180%) blur(16px);
+    }
+  }
+
+  /* Editorial hairline grid for dark hero panels. Drawn with repeating
+     background-image lines, not a colour gradient. */
+  .grid-lines {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  /* Edge fade for the marquee, as a mask rather than a painted overlay, so it
+     works over any theme surface. */
+  .marquee-mask {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 8%,
+      black 92%,
+      transparent
+    );
+  }
+}
+
+/* Autoplay progress for the testimonial carousel. Scale, not width, so it
+   animates on the compositor instead of triggering layout every frame. */
+@keyframes testimonial-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    /* Never from scale(0) — nothing in the world appears out of nothing. */
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ==========================================================================
+   Lenis
+   ScrollStack drives the page through Lenis while it is mounted. Native smooth
+   scrolling has to stand down for that window, or the two fight over the same
+   scroll position and the stack stutters.
+   ========================================================================== */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   Theme switch
+   The default cross-fade is replaced with a hard swap so the circular clip
+   animation in useTheme is the only thing you see. The new frame sits on top;
+   the old one stays put underneath and is revealed through the growing circle.
+   ========================================================================== */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* ==========================================================================
+   Scrollbars (desktop only touch platforms draw their own)
+   ========================================================================== */
+@media (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--line-strong));
+    border-radius: 999px;
+    /* Matches the page so the thumb reads as inset, in either theme. */
+    border: 3px solid rgb(var(--surface));
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--subtle));
+  }
+}
+
+/* ==========================================================================
+   Reduced motion
+   Fewer and gentler, not zero: opacity and colour still carry meaning, only
+   movement goes away.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Opacity transitions aid comprehension, so keep those running. */
+  .motion-safe-fade {
+    transition-property: opacity !important;
+    transition-duration: 200ms !important;
+  }
+
+  .press:active,
+  .press-sm:active,
+  .press-lg:active {
+    transform: none;
+  }
 }

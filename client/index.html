@@ -3,12 +3,68 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="DeskSpace - Find Your Perfect Workspace" />
+
+    <!-- viewport-fit=cover lets the layout run under the iOS notch / home indicator
+         so env(safe-area-inset-*) reports real values. maximum-scale=5 keeps pinch
+         zoom available; input zoom is prevented with a 16px font size instead. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5, viewport-fit=cover"
+    />
+
+    <meta
+      name="description"
+      content="deskplace - Find coworking spaces, private offices and meeting rooms across Hyderabad. Verified listings in HITEC City, Gachibowli, Madhapur, Banjara Hills and more."
+    />
+
+    <!-- Installed / standalone behaviour -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="deskplace" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Status bar / browser chrome matches the app surface -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1120" media="(prefers-color-scheme: dark)" />
+
+    <!-- Every photo on the site comes from this origin; opening the connection
+         early saves a DNS + TLS round trip on the first image. -->
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+
+    <!-- Instrument Serif for display, Archivo for text, JetBrains Mono for every
+         number and label. One request, three families. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <title>DeskSpace - Find Your Perfect Workspace</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400..700;1,400..600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <title>deskplace - Coworking &amp; Office Spaces in Hyderabad</title>
+
+    <!-- Runs before first paint. Without this the page renders light for a
+         frame and then flips, which is the flash every themed site has. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("deskplace-theme");
+          var dark =
+            stored === "dark" ||
+            (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) {
+            document.documentElement.classList.add("dark");
+            document.documentElement.style.colorScheme = "dark";
+          }
+        } catch (e) {
+          /* Blocked storage: fall through to the light default. */
+        }
+      })();
+    </script>
   </head>
   <body class="antialiased">
     <div id="root"></div>

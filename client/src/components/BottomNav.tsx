@@ -1,48 +1,36 @@
-import { NavLink, useLocation } from "react-router-dom";
-import { Home, LayoutGrid, Phone, User } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Home, Info, LayoutGrid, MessageSquare } from "lucide-react";
+// @ts-ignore - JS component from React Bits
+import Dock from "./Dock";
 
-const navItems = [
-  { to: "/", icon: Home, label: "Home" },
-  { to: "/workspaces", icon: LayoutGrid, label: "Browse" },
-  { to: "/about", icon: User, label: "About" },
+const tabs = [
+  { to: "/", icon: Home, label: "Home", exact: true },
+  { to: "/workspaces", icon: LayoutGrid, label: "Browse", exact: false },
+  { to: "/about", icon: Info, label: "About", exact: false },
+  { to: "/contact", icon: MessageSquare, label: "Contact", exact: false },
 ];
 
+/**
+ * Phone tab bar, built on the Dock component.
+ *
+ * Navigation itself is not animated — switching tabs happens dozens of times a
+ * session and native tab bars are instant. The magnification is a pointer
+ * affordance only; on touch the items stay at their base size (see Dock.css).
+ */
 export default function BottomNav() {
-  const location = useLocation();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const items = tabs.map((tab) => ({
+    label: tab.label,
+    icon: <tab.icon size={20} aria-hidden="true" />,
+    active: tab.exact ? pathname === tab.to : pathname.startsWith(tab.to),
+    onClick: () => navigate(tab.to),
+  }));
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 safe-area-bottom">
-      <div className="flex items-center justify-around h-16">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.to || (item.to !== "/" && location.pathname.startsWith(item.to));
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === "/"}
-              className={`flex flex-col items-center justify-center gap-1 w-full h-full transition-colors ${
-                isActive ? "text-primary-600" : "text-gray-400 hover:text-primary-500"
-              }`}
-            >
-              <div className={`p-1.5 rounded-xl transition-all ${isActive ? "bg-primary-50" : ""}`}>
-                <item.icon className={`w-5 h-5 ${isActive ? "stroke-[2]" : ""}`} />
-              </div>
-              <span className={`text-[10px] font-medium ${isActive ? "text-primary-600" : ""}`}>
-                {item.label}
-              </span>
-            </NavLink>
-          );
-        })}
-        <a
-          href="tel:+919999999999"
-          className="flex flex-col items-center justify-center gap-1 w-full h-full text-gray-400 hover:text-green-600 transition-colors"
-        >
-          <div className="p-1.5 rounded-xl bg-green-50">
-            <Phone className="w-5 h-5" />
-          </div>
-          <span className="text-[10px] font-medium text-green-600">Call</span>
-        </a>
-      </div>
-    </nav>
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center pb-safe px-safe md:hidden">
+      <Dock items={items} />
+    </div>
   );
 }

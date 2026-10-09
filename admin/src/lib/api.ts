@@ -6,7 +6,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("deskspace_token");
+  const token = localStorage.getItem("deskplace_token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -17,7 +17,7 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      localStorage.removeItem("deskspace_token");
+      localStorage.removeItem("deskplace_token");
       window.location.href = "/login";
     }
     return Promise.reject(err);

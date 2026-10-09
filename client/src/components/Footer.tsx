@@ -1,55 +1,112 @@
-import { Building2, Github } from "lucide-react";
+import { Building2, Mail, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
+import AnimatedWordmark from "./AnimatedWordmark";
+
+const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "919666120770";
+const telHref = `tel:${phoneNumber.startsWith("91") ? `+${phoneNumber}` : `+91${phoneNumber}`}`;
+const displayNumber = `+91 ${phoneNumber.slice(-10, -5)} ${phoneNumber.slice(-5)}`;
+
+const columns = [
+  {
+    title: "Explore",
+    links: [
+      { label: "Home", to: "/" },
+      { label: "Browse Workspaces", to: "/workspaces" },
+      { label: "About Us", to: "/about" },
+      { label: "Contact", to: "/contact" },
+    ],
+  },
+  {
+    title: "Workspace Types",
+    links: [
+      { label: "Private Offices", to: "/workspaces?type=Private+Offices" },
+      { label: "Dedicated Desks", to: "/workspaces?type=Dedicated+Desks" },
+      { label: "Meeting Rooms", to: "/workspaces?type=Meeting+Rooms" },
+      { label: "Virtual Offices", to: "/workspaces?type=Virtual+Offices" },
+    ],
+  },
+  {
+    title: "Localities",
+    links: [
+      { label: "HITEC City", to: "/workspaces?area=HITEC+City" },
+      { label: "Gachibowli", to: "/workspaces?area=Gachibowli" },
+      { label: "Madhapur", to: "/workspaces?area=Madhapur" },
+      { label: "Banjara Hills", to: "/workspaces?area=Banjara+Hills" },
+    ],
+  },
+];
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-400 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Brand */}
-          <div>
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center">
-                <Building2 className="w-4 h-4 text-white" />
-              </div>
-              <span className="text-lg font-bold text-white">DeskSpace</span>
+    // Always dark, in both themes — so it uses literal ink values rather than
+    // the theme tokens, which would turn the text dark-on-dark in light mode.
+    <footer className="mt-auto bg-ink-950 text-ink-400 px-safe">
+      <div className="mx-auto max-w-content px-4 py-9 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:gap-y-10 md:grid-cols-4 lg:grid-cols-5">
+          {/* Brand spans the full width on phones so the columns below pair up */}
+          <div className="col-span-2 md:col-span-4 lg:col-span-2 lg:pr-8">
+            <Link to="/" className="press mb-4 inline-flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white">
+                <Building2 className="h-4 w-4" />
+              </span>
+              <span className="text-lg font-bold text-white">DeskPlace</span>
             </Link>
-            <p className="text-sm leading-relaxed">
-              Find your perfect workspace. Premium coworking spaces, private offices, and meeting rooms.
+            <p className="max-w-sm text-sm leading-relaxed">
+              Premium coworking spaces, private offices and meeting rooms across
+              Hyderabad verified, transparently priced, and ready when you are.
             </p>
-          </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-white font-semibold mb-4">Quick Links</h3>
-            <div className="space-y-2">
-              <Link to="/" className="block text-sm hover:text-white transition-colors">Home</Link>
-              <Link to="/workspaces" className="block text-sm hover:text-white transition-colors">Workspaces</Link>
+            <div className="mt-6 space-y-3 text-sm">
+              <a
+                href={telHref}
+                className="flex items-center gap-2.5 transition-colors duration-160 ease-out md:hover:text-white"
+              >
+                <Phone className="h-4 w-4 shrink-0 text-primary-400" />
+                {displayNumber}
+              </a>
+              <a
+                href="mailto:hello@deskplace.in"
+                className="flex items-center gap-2.5 transition-colors duration-160 ease-out md:hover:text-white"
+              >
+                <Mail className="h-4 w-4 shrink-0 text-primary-400" />
+                hello@deskplace.in
+              </a>
+              <p className="flex items-start gap-2.5">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary-400" />
+                Cyber Towers, HITEC City, Hyderabad
+              </p>
             </div>
           </div>
 
-          {/* Contact */}
-          <div>
-            <h3 className="text-white font-semibold mb-4">Contact</h3>
-            <div className="space-y-2 text-sm">
-              <p>hello@deskspace.in</p>
-              <p>Hyderabad, India</p>
+          {columns.map((col) => (
+            <div key={col.title}>
+              <h3 className="mb-4 text-sm font-semibold text-white">{col.title}</h3>
+              <ul className="space-y-2.5">
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      to={link.to}
+                      className="text-sm transition-colors duration-160 ease-out md:hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
+          ))}
         </div>
 
-        <div className="mt-10 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm">&copy; {new Date().getFullYear()} DeskSpace. All rights reserved.</p>
-          <a
-            href="https://github.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-white transition-colors"
-            aria-label="GitHub"
-          >
-            <Github className="w-5 h-5" />
-          </a>
+        <div className="mt-9 flex flex-col items-center gap-3 border-t sm:mt-12 border-ink-800 pt-8 text-sm sm:flex-row sm:justify-between">
+          <p>&copy; {new Date().getFullYear()} DeskPlace. All rights reserved.</p>
+          <p className="text-ink-500">Built for people who need a desk today.</p>
         </div>
+      </div>
+
+      {/* Oversized wordmark, clipped at the page edge so the letters sit on the
+          fold rather than floating above it. */}
+      <div className="overflow-hidden px-4 pb-2 sm:px-6 lg:px-8">
+        <AnimatedWordmark className="mx-auto max-w-content" />
       </div>
     </footer>
   );

@@ -38,7 +38,7 @@ const STYLES: Record<ToastType, { wrap: string; icon: string; bar: string }> = {
 };
 
 /* Inject keyframes once into <head> */
-const STYLE_ID = "deskspace-toast-styles";
+const STYLE_ID = "deskplace-toast-styles";
 function injectStyles() {
   if (document.getElementById(STYLE_ID)) return;
   const el = document.createElement("style");

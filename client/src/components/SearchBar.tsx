@@ -1,36 +1,87 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Building2, MapPin, Search } from "lucide-react";
+import CustomSelect from "./CustomSelect";
+import { localities, workspaceTypes } from "../data/workspaces";
 
-export default function SearchBar() {
-  const [query, setQuery] = useState("");
+interface Props {
+  /** Rendered over the dark hero, where the surrounding text is white. */
+  onDark?: boolean;
+}
+
+export default function SearchBar({ onDark }: Props) {
   const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+  const [area, setArea] = useState("");
+  const [type, setType] = useState("");
 
-  const handleSearch = (e: React.FormEvent) => {
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
-      navigate(`/workspaces?area=${encodeURIComponent(query.trim())}`);
-    }
+    const params = new URLSearchParams();
+    if (query.trim()) params.set("q", query.trim());
+    if (area) params.set("area", area);
+    if (type) params.set("type", type);
+    navigate(`/workspaces${params.toString() ? `?${params}` : ""}`);
   };
 
   return (
-    <form onSubmit={handleSearch} className="relative w-full max-w-xl mx-auto">
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by area, city..."
-          className="w-full pl-12 pr-32 py-4 rounded-2xl bg-white border border-gray-200 shadow-lg shadow-gray-100 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all"
-        />
+    <form
+      onSubmit={submit}
+      className="w-full rounded-2xl bg-surface p-2.5 shadow-card ring-1 ring-line"
+      role="search"
+    >
+      {/* One column on phones, one row from lg up. The submit button is never
+          layered over the input that overlap is what made the old bar
+          impossible to tap accurately. */}
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+        <div className="relative flex-1 lg:min-w-0">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-subtle"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by name, locality or landmark"
+            aria-label="Search by name, locality or landmark"
+            className="h-12 w-full rounded-xl bg-sunken pl-10 pr-3 text-sm text-fg placeholder:text-subtle transition-colors duration-160 ease-out focus-visible:bg-surface focus-visible:ring-1 focus-visible:ring-brand"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 lg:contents">
+          <CustomSelect
+            value={area}
+            onChange={setArea}
+            options={localities}
+            placeholder="Any locality"
+            label="Locality"
+            icon={<MapPin className="h-4 w-4" />}
+            className="lg:w-44"
+            triggerClassName="bg-sunken border-transparent md:hover:border-line-strong"
+          />
+          <CustomSelect
+            value={type}
+            onChange={setType}
+            options={workspaceTypes}
+            placeholder="Any type"
+            label="Workspace type"
+            icon={<Building2 className="h-4 w-4" />}
+            className="lg:w-48"
+            triggerClassName="bg-sunken border-transparent md:hover:border-line-strong"
+          />
+        </div>
+
         <button
           type="submit"
-          className="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-purple-500 hover:from-primary-600 hover:to-purple-600 shadow-md transition-all"
+          className="press flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-brand px-6 text-sm font-semibold text-white transition-colors duration-160 ease-out md:hover:bg-brand-hover"
         >
+          <Search className="h-4 w-4 lg:hidden" aria-hidden="true" />
           Search
         </button>
       </div>
+
+      {onDark && <span className="sr-only">Search available workspaces</span>}
     </form>
   );
 }

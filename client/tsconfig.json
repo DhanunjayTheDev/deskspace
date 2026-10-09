@@ -15,7 +15,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
+    // TypeScript 7 removed `baseUrl`. Paths now resolve relative to this file,
+    // so the mapping works without it.
     "paths": {
       "@/*": ["./src/*"]
     }

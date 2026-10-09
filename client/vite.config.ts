@@ -3,9 +3,6 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
-  const apiBase = env.VITE_API_URL || "http://localhost:5000/api";
-
   return {
     plugins: [react()],
     resolve: {
@@ -15,16 +12,25 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 3000,
-      proxy: {
-        "/api": apiBase.replace("/api", ""),
-      },
     },
     build: {
+      outDir: "dist",
+      sourcemap: false,
       rollupOptions: {
         output: {
-          manualChunks: {
-            vendor: ["react", "react-dom", "react-router-dom"],
-            motion: ["framer-motion"],
+          // Function form rather than the object shorthand: Rolldown (Vite 8)
+          // only accepts a function, and Rollup accepts both, so this survives
+          // the bundler swap.
+          manualChunks(id) {
+            if (!id.includes("node_modules")) return;
+            if (id.includes("framer-motion") || id.includes("motion-dom")) return "motion";
+            if (
+              id.includes("react-router") ||
+              id.includes("/react-dom/") ||
+              id.includes("/react/")
+            ) {
+              return "vendor";
+            }
           },
         },
       },

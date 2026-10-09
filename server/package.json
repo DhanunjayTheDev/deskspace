@@ -1,7 +1,7 @@
 {
-  "name": "deskspace-server",
+  "name": "deskplace-server",
   "version": "1.0.0",
-  "description": "DeskSpace backend API",
+  "description": "deskplace backend API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -1,709 +1,490 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Sparkles, Shield, Clock, Headphones, Star, ChevronDown, Building2, LayoutGrid, Users, MessageSquare, Mail, Calendar, Zap } from "lucide-react";
-import { Link } from "react-router-dom";
-import Avatar from "boring-avatars";
 import { useState } from "react";
-import SearchBar from "../components/SearchBar";
+import { Link } from "react-router-dom";
+import {
+  ArrowRight,
+  Building2,
+  Calendar,
+  Check,
+  ChevronDown,
+  Clock,
+  Headphones,
+  LayoutGrid,
+  Mail,
+  MessageSquare,
+  Shield,
+  Sparkles,
+  Star,
+  Users,
+} from "lucide-react";
+import HeroCarousel from "../components/HeroCarousel";
 import WorkspaceCard from "../components/WorkspaceCard";
-import SkeletonCard from "../components/SkeletonCard";
-// @ts-ignore
-import LogoLoop from "../components/LogoLoop";
-// @ts-ignore
-import CircularText from "../components/CircularText";
-// @ts-ignore
-import Typewriter from "../components/Typewriter";
-// @ts-ignore
-import FloatingContactButton from "../components/FloatingContactButton";
-import { useFetch } from "../hooks/useFetch";
-import { workspaceApi, siteApi } from "../services/api";
+import TestimonialsCarousel from "../components/TestimonialsCarousel";
+import StickyStack from "../components/ui/StickyStack";
+// @ts-ignore - JS component from React Bits
+import ScrollExpand from "../components/ScrollExpand";
+import Reveal from "../components/ui/Reveal";
+import SectionHeading from "../components/ui/SectionHeading";
+import Button from "../components/ui/Button";
+import CountUp from "../components/ui/CountUp";
+import { staticTestimonials } from "../services/api";
+import { amenitiesList, localities, workspaces } from "../data/workspaces";
+import { cn } from "../lib/utils";
 
-const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "919666120770";
-const formattedNumber = phoneNumber.startsWith("91") ? `+${phoneNumber}` : `+91${phoneNumber}`;
+const featured = workspaces.filter((w) => w.isFeatured).slice(0, 6);
 
-interface Partner { _id: string; name: string; logo: string; website: string; }
-interface Testimonial { _id: string; name: string; role: string; company: string; photo: string; quote: string; rating: number; }
-interface FAQ { _id: string; question: string; answer: string; }
+const partners = [
+  "WeWork",
+  "Awfis",
+  "91springboard",
+  "Innov8",
+  "CoWrks",
+  "BHIVE",
+];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.1, duration: 0.5, ease: "easeOut" },
-  }),
-};
+const impact = [
+  { value: "250+", label: "Hyderabad workspaces", icon: Building2 },
+  { value: "12,000+", label: "Professionals seated", icon: Users },
+  { value: "98%", label: "Customer satisfaction", icon: Star },
+  { value: "24 hrs", label: "Avg. response time", icon: Clock },
+];
 
 const features = [
   {
     icon: Sparkles,
-    title: "Premium Spaces",
-    desc: "Handpicked workspaces with modern amenities and stunning interiors",
+    title: "Premium spaces",
+    desc: "Handpicked workspaces with modern amenities and interiors worth showing up for.",
   },
   {
     icon: Shield,
-    title: "Verified Listings",
-    desc: "Every workspace is personally verified for quality and authenticity",
+    title: "Verified listings",
+    desc: "Every workspace is personally verified for quality and authenticity before it goes live.",
   },
   {
     icon: Clock,
-    title: "Instant Booking",
-    desc: "Get connected with workspace owners in minutes, not days",
+    title: "Instant booking",
+    desc: "Get connected with workspace owners in minutes, not days.",
   },
   {
     icon: Headphones,
-    title: "Dedicated Support",
-    desc: "Our team helps you find the perfect space for your needs",
+    title: "Dedicated support",
+    desc: "A real team that helps you find the right space for how your team actually works.",
+  },
+];
+
+const steps = [
+  {
+    step: "01",
+    title: "Search & discover",
+    desc: "Browse curated workspaces by city, budget, amenities and team size.",
+    icon: Sparkles,
+  },
+  {
+    step: "02",
+    title: "Compare & connect",
+    desc: "View photos, pricing and availability, then message owners or book a tour.",
+    icon: LayoutGrid,
+  },
+  {
+    step: "03",
+    title: "Book & move in",
+    desc: "Secure your space on flexible terms and start working immediately.",
+    icon: Shield,
+  },
+];
+
+// `title` must match the canonical values in `workspaceTypes` the type filter
+// compares exactly, so a casing drift here silently returns zero results.
+const types = [
+  { title: "Private Offices", desc: "Lockable, furnished offices for teams of 2–50+", icon: Building2, badge: "Popular" },
+  { title: "Dedicated Desks", desc: "Your own desk in a shared office with 24/7 access", icon: LayoutGrid, badge: "Flexible" },
+  { title: "Hot Desks", desc: "First-come, first-served seating in vibrant spaces", icon: Users, badge: "Budget" },
+  { title: "Meeting Rooms", desc: "Hourly rooms with AV, whiteboards and fast Wi-Fi", icon: MessageSquare, badge: "On-demand" },
+  { title: "Virtual Offices", desc: "Business address, mail handling, call forwarding", icon: Mail, badge: "Remote" },
+  { title: "Event Spaces", desc: "Large venues for workshops, training and meetups", icon: Calendar, badge: "Groups" },
+];
+
+const faqs = [
+  {
+    id: "f1",
+    q: "How does DeskPlace work?",
+    a: "We connect you with verified workspace providers. Browse listings, compare options, and talk directly to owners to book your space.",
+  },
+  {
+    id: "f2",
+    q: "Are all listings verified?",
+    a: "Yes. Every workspace is personally verified for quality, amenities and authenticity before it appears on the site.",
+  },
+  {
+    id: "f3",
+    q: "Can I book a meeting room for a few hours?",
+    a: "Absolutely. Many spaces offer hourly meeting room bookings with instant confirmation.",
+  },
+  {
+    id: "f4",
+    q: "What's included in the price?",
+    a: "Usually high-speed WiFi, meeting room access, 24/7 entry, reception and utilities. Check each listing for exact inclusions.",
+  },
+  {
+    id: "f5",
+    q: "Is there a minimum commitment?",
+    a: "Terms run from hourly bookings to monthly contracts. Most spaces need no long-term commitment.",
   },
 ];
 
 export default function Home() {
-  const { data: featured, loading } = useFetch(() => workspaceApi.getFeatured(), []);
-  const { data: partners } = useFetch<Partner[]>(() => siteApi.getPartners(), []);
-  const { data: testimonials } = useFetch<Testimonial[]>(() => siteApi.getTestimonials(), []);
-  const { data: faqs } = useFetch<FAQ[]>(() => siteApi.getFAQs(), []);
   const [openFaq, setOpenFaq] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-4 overflow-hidden">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-purple-50" />
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3],
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-20 -left-32 w-96 h-96 bg-primary-200 rounded-full blur-3xl"
-          />
-          <motion.div
-            animate={{
-              scale: [1.2, 1, 1.2],
-              opacity: [0.2, 0.4, 0.2],
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-10 right-0 w-80 h-80 bg-purple-200 rounded-full blur-3xl"
-          />
-          
-          {/* Floating geometric shapes */}
-          <motion.div
-            animate={{
-              y: [0, -30, 0],
-              x: [0, 20, 0],
-            }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-20 right-20 w-24 h-24 bg-primary-300/20 rounded-3xl blur-2xl"
-          />
-          <motion.div
-            animate={{
-              y: [0, 30, 0],
-              x: [0, -20, 0],
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute top-40 left-20 w-32 h-32 bg-purple-300/20 rounded-full blur-2xl"
-          />
-        </div>
+    <>
+      <HeroCarousel />
 
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left content */}
-            <div className="text-center lg:text-left z-10">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-100 text-primary-700 text-sm font-medium mb-6">
-                  <Sparkles className="w-4 h-4" />
-                  Premium Workspace Solutions
-                </span>
-              </motion.div>
+      {/* Partners. A ruled row of wordmarks rather than a scrolling strip of
+          pills — the names read as a masthead credit line, and nothing moves
+          while you are trying to read it. */}
+      <section className="border-y border-line bg-sunken px-safe">
+        <div className="mx-auto max-w-content px-4 sm:px-6 lg:px-8">
+          <div className="grid items-center gap-6 py-8 lg:grid-cols-[auto_1fr] lg:gap-10 lg:py-9">
+            <p className="font-mono text-[11px] uppercase leading-relaxed tracking-[0.2em] text-subtle lg:max-w-[9rem]">
+              Trusted by
+              <br className="hidden lg:block" /> teams at
+            </p>
 
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight flex flex-wrap items-center gap-3"
-              >
-                <span>Find Your Perfect</span>
-                <Typewriter
-                  texts={[
-                    "Private Office",
-                    "Meeting Rooms",
-                    "Dedicated Desks",
-                    "Virtual Office",
-                    "Training Room",
-                  ]}
-                  className="bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 bg-clip-text text-transparent"
-                  typeSpeed={80}
-                  deleteSpeed={40}
-                  pauseDuration={2000}
-                />
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="mt-6 text-lg text-gray-600 max-w-2xl"
-              >
-                Discover premium coworking spaces, private offices, and meeting rooms.
-                Your ideal workspace is just a search away.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="mt-10 flex justify-center lg:justify-start"
-              >
-                <SearchBar />
-              </motion.div>
-            </div>
-
-            {/* Right visual element */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative hidden lg:flex items-center justify-center"
-            >
-              {/* Floating card 1 */}
-              <motion.div
-                animate={{
-                  y: [0, -20, 0],
-                  rotateZ: [0, 5, 0],
-                }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute w-72 bg-white rounded-3xl p-6 shadow-2xl border border-gray-100 z-20"
-                style={{ top: "0", left: "0" }}
-              >
-                <div className="flex gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center">
-                    <Building2 className="w-6 h-6 text-primary-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Private Office</p>
-                    <p className="text-xs text-gray-500">Dedicated space</p>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600">Perfect for teams needing focused work</p>
-              </motion.div>
-
-              {/* Floating card 2 */}
-              <motion.div
-                animate={{
-                  y: [0, 20, 0],
-                  rotateZ: [0, -5, 0],
-                }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute w-72 bg-white rounded-3xl p-6 shadow-2xl border border-gray-100 z-10"
-                style={{ bottom: "20px", right: "0" }}
-              >
-                <div className="flex gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Verified Listings</p>
-                    <p className="text-xs text-gray-500">100% authentic</p>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600">All spaces verified for quality</p>
-              </motion.div>
-
-              {/* Center circular design */}
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute w-96 h-96 rounded-full border-2 border-primary-200/30 flex items-center justify-center"
-              >
-                <motion.div
-                  animate={{ rotate: -360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="w-72 h-72 rounded-full border-2 border-purple-200/30 flex items-center justify-center"
+            <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+              {partners.map((name) => (
+                <li
+                  key={name}
+                  className={cn(
+                    "border-line py-3 text-center font-display text-xl tracking-tight text-muted",
+                    // Hairline rules between cells, matching the column count
+                    // at each breakpoint so no stray edge is ever left hanging.
+                    "border-b [&:nth-last-child(-n+2)]:border-b-0",
+                    "sm:[&:nth-last-child(-n+3)]:border-b-0",
+                    "lg:border-b-0",
+                    "[&:not(:nth-child(2n))]:border-r",
+                    "sm:[&:not(:nth-child(3n))]:border-r sm:[&:nth-child(2n)]:border-r",
+                    "lg:[&:not(:last-child)]:border-r lg:[&:nth-child(2n)]:border-r"
+                  )}
                 >
-                  <div className="w-48 h-48 rounded-full bg-gradient-to-br from-primary-100 to-purple-100 flex items-center justify-center shadow-lg">
-                    <div className="text-center">
-                      <Building2 className="w-16 h-16 text-primary-600 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm font-semibold text-gray-700">Workspace Hub</p>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-            </motion.div>
-          </div>
-
-          {/* Bottom circle decoration */}
-          <div className="absolute right-6 bottom-6 hidden md:block">
-            <CircularText text=" ★ DESKSPACE ★ DESKSPACE" spinDuration={15} onHover="speedUp" />
+                  {name}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
 
-      {/* Trusted Partners */}
-      {partners && partners.length > 0 && (
-        <section className="py-12 px-4 bg-gray-50 border-y border-gray-100">
-          <div className="max-w-7xl mx-auto">
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-center text-xs font-semibold text-gray-400 uppercase tracking-widest mb-8"
-            >
-              Trusted Partners
-            </motion.p>
-            <div className="relative group">
-              {/* Left depth effect */}
-              <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none z-10" />
-              
-              {/* Right depth effect */}
-              <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none z-10" />
-              
-              <LogoLoop
-                logos={(Array.isArray(partners) ? partners : []).map((p) => ({
-                  _id: p._id,
-                  src: p.logo,
-                  alt: p.name,
-                  title: p.name,
-                }))}
-                speed={120}
-                direction="left"
-                pauseOnHover={true}
-                logoHeight={32}
-                gap={48}
-                renderItem={(item: any) => (
-                  <img
-                    src={item.src}
-                    alt={item.alt}
-                    title={item.title}
-                    className="h-8 object-contain opacity-60 hover:opacity-100 transition-opacity"
-                  />
-                )}
-              />
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Impact. The stat boxes are gone — the numbers now land over a frame
+          that opens to full bleed as you scroll past it. */}
+      <section className="bg-ink-950">
+        <ScrollExpand
+          useWindowScroll
+          src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=1800&q=80&fit=crop"
+          alt="A workspace lounge in Hyderabad"
+          title="Built around Hyderabad"
+          scrollHint="Scroll"
+          startWidth={62}
+          startHeight={54}
+          startRadius={28}
+          mediaZoom={1.25}
+          scrollDistance={1}
+          holdDistance={0.25}
+          overlayScrim={0.8}
+        >
+          <p className="text-xs font-semibold uppercase tracking-widest text-white/60">
+            Our impact
+          </p>
+          <dl className="mt-6 grid w-full max-w-3xl grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
+            {impact.map((item) => (
+              <div key={item.label}>
+                <dd className="text-2xl font-extrabold tracking-tight text-white sm:text-4xl">
+                  <CountUp value={item.value} />
+                </dd>
+                <dt className="mt-1 text-xs text-white/60 sm:text-sm">{item.label}</dt>
+              </div>
+            ))}
+          </dl>
+        </ScrollExpand>
+      </section>
 
-      {/* Featured Workspaces */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="flex items-center justify-between mb-10"
-          >
-            <motion.div variants={fadeUp} custom={0}>
-              <h2 className="text-3xl font-bold text-gray-900">Featured Workspaces</h2>
-              <p className="text-gray-500 mt-2">Handpicked spaces for your team</p>
-            </motion.div>
-            <motion.div variants={fadeUp} custom={1}>
+      {/* Featured workspaces */}
+      <section className="bg-sunken section-y px-safe">
+        <div className="mx-auto max-w-content px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            align="left"
+            eyebrow="Featured"
+            title="Handpicked spaces"
+            subtitle="Spaces our team would put their own desk in."
+            action={
               <Link
                 to="/workspaces"
-                className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors"
+                className="press hidden items-center gap-1.5 text-sm font-semibold text-brand-soft-fg sm:inline-flex"
               >
-                View All <ArrowRight className="w-4 h-4" />
+                View all <ArrowRight className="h-4 w-4" />
               </Link>
-            </motion.div>
-          </motion.div>
+            }
+          />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading
-              ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-              : (Array.isArray(featured) ? featured : []).slice(0, 6).map((w, i) => (
-                  <motion.div
-                    key={w._id}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.08, duration: 0.4 }}
-                  >
-                    <WorkspaceCard workspace={w} />
-                  </motion.div>
-                ))}
+          {/* Phone: a swipeable rail, the way a native app shows a shelf.
+              Tablet and up: a plain grid. */}
+          <div className="snap-row edge-bleed gap-4 pb-2 sm:hidden">
+            {featured.map((w) => (
+              <div key={w._id} className="snap-item w-[78vw] max-w-[20rem]">
+                <WorkspaceCard workspace={w} compact />
+              </div>
+            ))}
           </div>
 
-          {!loading && (!featured || featured.length === 0) && (
-            <div className="text-center py-16">
-              <p className="text-gray-400 text-lg">No featured workspaces yet. Check back soon!</p>
-            </div>
-          )}
+          <div className="hidden gap-6 sm:grid sm:grid-cols-2 lg:grid-cols-3">
+            {featured.map((w, i) => (
+              <Reveal key={w._id} index={i}>
+                <WorkspaceCard workspace={w} />
+              </Reveal>
+            ))}
+          </div>
 
-          <div className="sm:hidden mt-8 text-center">
-            <Link
-              to="/workspaces"
-              className="inline-flex items-center gap-1.5 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-purple-500"
-            >
-              View All Workspaces <ArrowRight className="w-4 h-4" />
-            </Link>
+          <div className="mt-6 sm:hidden">
+            <Button to="/workspaces" fullWidth size="lg">
+              View all workspaces
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Why us */}
+      <section className="section-y px-safe">
+        <div className="mx-auto max-w-content px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            eyebrow="Why us"
+            title="Why choose DeskPlace"
+            subtitle="Everything you need to find the right workspace, and nothing you don't."
+          />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+            {features.map((f, i) => (
+              <Reveal
+                key={f.title}
+                index={i}
+                className="rounded-2xl bg-sunken p-6 transition-colors duration-200 ease-out md:hover:bg-brand-soft"
+              >
+                <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand text-white">
+                  <f.icon className="h-6 w-6" aria-hidden="true" />
+                </span>
+                <h3 className="text-lg font-bold tracking-tight text-fg">
+                  {f.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{f.desc}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="bg-sunken section-y px-safe">
+        <div className="mx-auto max-w-content px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            eyebrow="How it works"
+            title="Find your space in 3 steps"
+            subtitle="Simple, transparent, and built for people who are busy."
+          />
+          {/* The three steps stack as you scroll rather than sitting side by
+              side, so you read them in order instead of scanning a row. */}
+          <StickyStack
+            items={steps.map((s) => ({
+              id: s.step,
+              eyebrow: `Step ${s.step}`,
+              title: s.title,
+              desc: s.desc,
+              icon: s.icon,
+            }))}
+          />
+        </div>
+      </section>
+
+      {/* Workspace types */}
+      <section className="section-y px-safe">
+        <div className="mx-auto max-w-content px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            eyebrow="Workspace types"
+            title="Spaces for every need"
+            subtitle="From a single desk to a whole floor."
+          />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+            {types.map((item, i) => (
+              <Reveal key={item.title} index={i}>
+                <Link
+                  to={`/workspaces?type=${encodeURIComponent(item.title)}`}
+                  className="press hover-lift relative block h-full rounded-2xl bg-surface p-6 shadow-card ring-1 ring-line md:hover:shadow-card-hover"
+                >
+                  <span className="absolute right-4 top-4 rounded-md bg-elevated px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-muted">
+                    {item.badge}
+                  </span>
+                  <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-soft text-brand-soft-fg">
+                    <item.icon className="h-6 w-6" aria-hidden="true" />
+                  </span>
+                  <h3 className="text-lg font-bold tracking-tight text-fg">
+                    {item.title}
+                  </h3>
+                  <p className="mt-1.5 text-sm text-muted">{item.desc}</p>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* What's included */}
+      <section className="bg-sunken section-y px-safe">
+        <div className="mx-auto max-w-content px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            eyebrow="What's included"
+            title="Everything comes standard"
+            subtitle="Every DeskPlace listing is verified against this checklist before it goes live."
+          />
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {amenitiesList.map((item, i) => (
+              <Reveal
+                key={item}
+                as="li"
+                index={Math.min(i, 5)}
+                className="flex items-center gap-3 rounded-xl bg-surface px-4 py-3.5 ring-1 ring-line"
+              >
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success-600/15 text-success-600 dark:text-success-400">
+                  <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
+                </span>
+                <span className="text-sm font-medium text-fg">{item}</span>
+              </Reveal>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Localities */}
+      <section className="section-y px-safe">
+        <div className="mx-auto max-w-content px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            eyebrow="Our reach"
+            title="Workspaces across Hyderabad"
+            subtitle="From HITEC City and the Financial District to Banjara Hills and Secunderabad."
+          />
+          <div className="mx-auto grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {localities.map((area, i) => (
+              <Reveal key={area} index={Math.min(i, 5)}>
+                <Link
+                  to={`/workspaces?area=${encodeURIComponent(area)}`}
+                  className="press flex h-full items-center gap-3 rounded-xl bg-surface p-3.5 ring-1 ring-line transition-colors duration-200 ease-out md:hover:ring-brand"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-xs font-bold text-brand-soft-fg">
+                    {area
+                      .split(" ")
+                      .map((w) => w[0])
+                      .join("")
+                      .slice(0, 2)}
+                  </span>
+                  <span className="min-w-0 truncate text-sm font-semibold text-fg">
+                    {area}
+                  </span>
+                </Link>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      {testimonials && testimonials.length > 0 && (
-        <section className="py-20 px-4 bg-gradient-to-br from-primary-50 via-white to-purple-50">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-14"
-            >
-              <h2 className="text-3xl font-bold text-gray-900">What People Say</h2>
-              <p className="text-gray-500 mt-2">Hear from professionals who found their perfect workspace</p>
-            </motion.div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(Array.isArray(testimonials) ? testimonials : []).map((t, i) => (
-                <motion.div
-                  key={t._id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.08 }}
-                  className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4"
+      <section className="bg-sunken section-y px-safe">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            eyebrow="Testimonials"
+            title="What people say"
+            subtitle="From teams who found their space through us."
+          />
+          <Reveal>
+            <TestimonialsCarousel items={staticTestimonials} />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="section-y px-safe">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            eyebrow="FAQ"
+            title="Frequently asked questions"
+            subtitle="Everything you need to know before you book."
+          />
+          <div className="space-y-2.5">
+            {faqs.map((f, i) => {
+              const open = openFaq === f.id;
+              return (
+                <Reveal
+                  key={f.id}
+                  index={Math.min(i, 3)}
+                  className="overflow-hidden rounded-2xl bg-surface ring-1 ring-line-strong"
                 >
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: t.rating }).map((_, j) => (
-                      <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <p className="text-gray-600 text-sm leading-relaxed flex-1">"{t.quote}"</p>
-                  <div className="flex items-center gap-3 pt-2 border-t border-gray-50">
-                    {t.photo
-                      ? <img src={t.photo} alt={t.name} className="w-10 h-10 rounded-full object-cover" />
-                      : <Avatar size={40} name={t.name || "User"} variant="beam" colors={["#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe", "#e0e7ff"]} />
-                    }
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{t.name}</p>
-                      <p className="text-xs text-gray-400">{t.role}{t.company ? ` · ${t.company}` : ""}</p>
+                  <h3>
+                    <button
+                      onClick={() => setOpenFaq(open ? null : f.id)}
+                      aria-expanded={open}
+                      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors duration-160 ease-out md:hover:bg-sunken"
+                    >
+                      <span className="font-semibold text-fg">{f.q}</span>
+                      <ChevronDown
+                        className={cn(
+                          "h-5 w-5 shrink-0 text-subtle transition-transform duration-250 ease-out",
+                          open && "rotate-180"
+                        )}
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </h3>
+                  {/* grid-rows 0fr→1fr animates to the content's real height with
+                      a plain CSS transition, so rapid toggling retargets
+                      smoothly instead of restarting a keyframe. */}
+                  <div
+                    className={cn(
+                      "grid transition-[grid-template-rows] duration-250 ease-out",
+                      open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                    )}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="px-5 pb-5 leading-relaxed text-muted">{f.a}</p>
                     </div>
                   </div>
-                </motion.div>
-              ))}
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="section-y px-safe">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <Reveal className="rounded-3xl bg-brand px-6 py-10 text-center sm:px-12 sm:py-14 lg:py-16">
+            <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+              Get your workspace in minutes
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-primary-100 sm:text-lg">
+              Browse premium workspaces, talk to owners, and secure the right space all
+              in one place.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Button to="/workspaces" variant="white" size="lg">
+                Explore workspaces
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+              <Button
+                to="/contact"
+                size="lg"
+                className="bg-primary-500 text-white md:hover:bg-primary-400"
+              >
+                Talk to us
+              </Button>
             </div>
-          </div>
-        </section>
-      )}
-
-      {/* Why Choose Us */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-14"
-          >
-            <h2 className="text-3xl font-bold text-gray-900">Why Choose DeskSpace</h2>
-            <p className="text-gray-500 mt-2">Everything you need to find the perfect workspace</p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                custom={i}
-                variants={fadeUp}
-                className="group p-6 rounded-2xl bg-gray-50 hover:bg-gradient-to-br hover:from-primary-50 hover:to-purple-50 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <f.icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{f.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
-              </motion.div>
-            ))}
-          </div>
+          </Reveal>
         </div>
       </section>
-
-      {/* FAQ Section */}
-      {faqs && faqs.length > 0 && (
-        <section className="py-20 px-4 bg-white">
-          <div className="max-w-3xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
-              <h2 className="text-3xl font-bold text-gray-900">Frequently Asked Questions</h2>
-              <p className="text-gray-500 mt-2">Everything you need to know about workspace booking</p>
-            </motion.div>
-            <div className="space-y-3">
-              {(Array.isArray(faqs) ? faqs : []).map((f, i) => (
-                <motion.div
-                  key={f._id}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
-                  className="rounded-2xl border border-gray-100 overflow-hidden"
-                >
-                  <button
-                    onClick={() => setOpenFaq(openFaq === f._id ? null : f._id)}
-                    className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 transition-colors"
-                  >
-                    <span className="font-medium text-gray-900 pr-4">{f.question}</span>
-                    <ChevronDown className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform ${openFaq === f._id ? "rotate-180" : ""}`} />
-                  </button>
-                  <AnimatePresence initial={false}>
-                    {openFaq === f._id && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        <p className="px-6 pb-5 text-sm text-gray-500 leading-relaxed">{f.answer}</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* How It Works */}
-      <section className="py-20 px-4 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">How It Works</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Find Your Space in 3 Steps</h2>
-            <p className="text-gray-500 mt-3 max-w-2xl mx-auto">Simple, transparent, and designed for busy professionals</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { step: "01", title: "Search & Discover", desc: "Browse curated workspaces by city, budget, amenities, and team size. Filter to find exactly what you need.", icon: Sparkles },
-              { step: "02", title: "Compare & Connect", desc: "View photos, pricing, and availability. Direct message owners or schedule tours with one click.", icon: LayoutGrid },
-              { step: "03", title: "Book & Move In", desc: "Secure your space with flexible terms. Get keys or access codes and start working immediately.", icon: Shield },
-            ].map((item, i) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="relative bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow"
-              >
-                <div className="absolute -top-3 left-8 w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                  <span className="text-sm font-bold text-primary-600">{item.step}</span>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center mb-4">
-                  <item.icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-gray-500 leading-relaxed">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Workspace Types */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">Workspace Types</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Spaces for Every Need</h2>
-            <p className="text-gray-500 mt-3 max-w-2xl mx-auto">From solo desks to enterprise offices, find the perfect fit</p>
-          </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { title: "Private Offices", desc: "Lockable, furnished offices for teams of 2-50+", icon: Building2, gradient: "from-blue-500 to-blue-600", badge: "Most Popular" },
-              { title: "Dedicated Desks", desc: "Your own desk in a shared office with 24/7 access", icon: LayoutGrid, gradient: "from-purple-500 to-purple-600", badge: "Flexible" },
-              { title: "Hot Desks", desc: "First-come, first-served seating in vibrant spaces", icon: Users, gradient: "from-green-500 to-green-600", badge: "Budget-Friendly" },
-              { title: "Meeting Rooms", desc: "Hourly bookable rooms with AV, whiteboards, WiFi", icon: MessageSquare, gradient: "from-orange-500 to-orange-600", badge: "On-Demand" },
-              { title: "Virtual Offices", desc: "Business address, mail handling, call forwarding", icon: Mail, gradient: "from-pink-500 to-pink-600", badge: "Remote-First" },
-              { title: "Event Spaces", desc: "Large venues for workshops, training, networking", icon: Calendar, gradient: "from-indigo-500 to-indigo-600", badge: "Large Groups" },
-            ].map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                className="group relative p-6 rounded-2xl bg-gray-50 border border-gray-100 hover:border-primary-200 hover:bg-white transition-all duration-300 hover:shadow-lg"
-              >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <item.icon className="w-6 h-6 text-white" />
-                </div>
-                {item.badge && (
-                  <span className="absolute top-4 right-4 text-xs font-semibold text-white px-2 py-1 rounded-full bg-primary-500">{item.badge}</span>
-                )}
-                <h3 className="text-lg font-bold text-gray-900 mb-1">{item.title}</h3>
-                <p className="text-sm text-gray-500">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Cities We Serve */}
-      <section className="py-20 px-4 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">Our Reach</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Workspaces Across India</h2>
-            <p className="text-gray-500 mt-3 max-w-2xl mx-auto">Premium locations in major business hubs and emerging startup cities</p>
-          </motion.div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 max-w-4xl mx-auto">
-            {[
-              "Mumbai", "Delhi NCR", "Bangalore", "Hyderabad", "Pune", "Chennai",
-              "Ahmedabad", "Kolkata", "Jaipur", "Chandigarh", "Kochi", "Indore"
-            ].map((city, i) => (
-              <motion.div
-                key={city}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.03 }}
-                className="bg-white rounded-xl p-4 text-center hover:shadow-md hover:bg-primary-50 transition-all duration-300 cursor-pointer border border-gray-100"
-              >
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center mx-auto mb-2 text-white font-semibold text-sm">
-                  {city.split(' ').map(w => w[0]).join('')}
-                </div>
-                <p className="text-sm font-medium text-gray-900">{city}</p>
-                <p className="text-xs text-gray-400 mt-0.5">50+ locations</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Impact Stats */}
-      <section className="py-20 px-4 bg-white border-y border-gray-100">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { value: "1,200+", label: "Workspaces Listed", icon: Building2, color: "primary" },
-              { value: "50,000+", label: "Professionals Served", icon: Users, color: "purple" },
-              { value: "98%", label: "Customer Satisfaction", icon: Star, color: "amber" },
-              { value: "24 hrs", label: "Avg. Response Time", icon: Clock, color: "green" },
-            ].map((item, i) => (
-              <motion.div
-                key={item.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center"
-              >
-                <div className={`w-16 h-16 rounded-2xl bg-${item.color}-100 flex items-center justify-center mx-auto mb-4`}>
-                  <item.icon className={`w-8 h-8 text-${item.color}-600`} />
-                </div>
-                <div className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-1">{item.value}</div>
-                <div className="text-gray-500">{item.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter */}
-      <section className="py-20 px-4 bg-gray-900">
-        <div className="max-w-2xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Stay Updated</h2>
-            <p className="text-gray-300 mb-8">Get the latest workspace trends, new listings, and exclusive deals delivered to your inbox.</p>
-            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-5 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              />
-              <button
-                type="submit"
-                className="px-8 py-3 rounded-xl bg-gradient-to-r from-primary-500 to-purple-500 text-white font-semibold hover:from-primary-600 hover:to-purple-600 transition-all shadow-lg shadow-primary-500/25"
-              >
-                Subscribe
-              </button>
-            </form>
-            <p className="text-xs text-gray-500 mt-4">No spam. Unsubscribe anytime.</p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="relative rounded-3xl overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-purple-600" />
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,white_0%,transparent_50%)]" />
-            </div>
-            <div className="relative z-10 px-8 py-16 sm:px-16 text-center">
-              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                Get Your Workspace in Minutes
-              </h2>
-              <p className="text-primary-100 text-lg mb-8 max-w-xl mx-auto">
-                Browse premium workspaces, connect with owners, and secure your perfect space all in one place.
-              </p>
-              <Link
-                to="/workspaces"
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-base font-semibold text-primary-700 bg-white hover:bg-primary-50 shadow-lg transition-all"
-              >
-                Explore Workspaces <ArrowRight className="w-5 h-5" />
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Floating Phone Button (desktop left) */}
-      <div className="fixed bottom-8 left-8 z-40 hidden md:block">
-        <motion.a
-          href={`tel:${formattedNumber}`}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          whileHover={{ scale: 1.1 }}
-          className="flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg hover:shadow-xl transition-shadow"
-          title="Call us"
-        >
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-          </svg>
-        </motion.a>
-      </div>
-
-      {/* Floating WhatsApp Button (desktop right) */}
-      <FloatingContactButton whatsappNumber={phoneNumber} />
-    </div>
+    </>
   );
 }

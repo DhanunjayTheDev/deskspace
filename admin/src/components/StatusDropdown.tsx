@@ -44,7 +44,7 @@ export default function StatusDropdown({ value, onChange }: Props) {
   const current =
     STATUS_OPTIONS.find((o) => o.value === value) ?? STATUS_OPTIONS[0];
 
-  // Close on outside click — but NOT when clicking inside the portal panel
+  // Close on outside click but NOT when clicking inside the portal panel
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (

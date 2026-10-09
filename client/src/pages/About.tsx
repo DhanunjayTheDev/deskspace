@@ -1,386 +1,445 @@
-import { motion } from "framer-motion";
-import { useFetch } from "../hooks/useFetch";
-import { siteApi } from "../services/api";
-import { Trophy, MapPin, Users, Building2, TrendingUp, Target, Heart, Lightbulb, Globe, Award, BookOpen, Zap, Shield, Star } from "lucide-react";
-
-interface TeamMember { _id: string; name: string; role: string; bio: string; photo: string; }
-interface Award { _id: string; title: string; year: string; description: string; image: string; }
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { delay: i * 0.09, duration: 0.5, ease: "easeOut" },
-  }),
-};
+import {
+  Building2,
+  Globe,
+  Heart,
+  Lightbulb,
+  MapPin,
+  Shield,
+  Star,
+  Target,
+  TrendingUp,
+  Trophy,
+  Users,
+  Zap,
+} from "lucide-react";
+import { staticAwards, staticTeam } from "../services/api";
+import Reveal from "../components/ui/Reveal";
+import SectionHeading from "../components/ui/SectionHeading";
+import Button from "../components/ui/Button";
+import CountUp from "../components/ui/CountUp";
 
 const stats = [
-  { icon: Building2, value: "500+", label: "Workspaces" },
-  { icon: MapPin, value: "50+", label: "Cities" },
-  { icon: Users, value: "10K+", label: "Happy Users" },
+  { icon: Building2, value: "250+", label: "Workspaces" },
+  { icon: MapPin, value: "16", label: "Localities" },
+  { icon: Users, value: "12K+", label: "Happy users" },
   { icon: TrendingUp, value: "95%", label: "Satisfaction" },
 ];
 
+const values = [
+  {
+    icon: Target,
+    title: "User first",
+    desc: "Every feature starts with what's best for the people using the platform.",
+  },
+  {
+    icon: Heart,
+    title: "Trust & transparency",
+    desc: "Verified listings, honest pricing, real reviews. No hidden fees.",
+  },
+  {
+    icon: Lightbulb,
+    title: "Continuous innovation",
+    desc: "Better matching, smarter search. Standing still isn't an option.",
+  },
+  {
+    icon: Globe,
+    title: "City-wide reach, local heart",
+    desc: "Coverage across Hyderabad that still understands every neighbourhood.",
+  },
+];
+
+const differences = [
+  {
+    icon: Shield,
+    title: "100% verified",
+    desc: "Every space vetted by our team. No fake listings, no surprises.",
+    badge: "Trust",
+  },
+  {
+    icon: Zap,
+    title: "Instant access",
+    desc: "Book tours, negotiate terms and get keys in hours, not weeks.",
+    badge: "Speed",
+  },
+  {
+    icon: Heart,
+    title: "Dedicated support",
+    desc: "Real people helping from first search through to move-in day.",
+    badge: "Care",
+  },
+  {
+    icon: TrendingUp,
+    title: "Flexible terms",
+    desc: "Month-to-month, yearly or custom. Scale up or down as you grow.",
+    badge: "Freedom",
+  },
+];
+
+const milestones = [
+  {
+    year: "2024",
+    title: "Series A funding",
+    desc: "Raised $15M to deepen coverage across Hyderabad and launch smarter matching.",
+    icon: TrendingUp,
+  },
+  {
+    year: "2023",
+    title: "250+ workspaces",
+    desc: "Crossed 250 verified listings across 16 Hyderabad business localities.",
+    icon: Building2,
+  },
+  {
+    year: "2022",
+    title: "Mobile app launch",
+    desc: "Released iOS and Android apps with instant booking and virtual tours.",
+    icon: Zap,
+  },
+  {
+    year: "2021",
+    title: "Platform v2",
+    desc: "Rebuilt from the ground up with verified listings and recommendations.",
+    icon: Lightbulb,
+  },
+  {
+    year: "2020",
+    title: "Founded",
+    desc: "Started with a mission to make finding workspace as easy as booking a hotel.",
+    icon: Star,
+  },
+];
+
 export default function About() {
-  const { data: team } = useFetch<TeamMember[]>(() => siteApi.getTeam(), []);
-  const { data: awards } = useFetch<Award[]>(() => siteApi.getAwards(), []);
+  // Bundled data, read straight from the module. Routing it through a promise
+  // only bought an extra render and a frame of empty layout.
+  const team = staticTeam;
+  const awards = staticAwards;
 
   return (
-    <div className="min-h-screen">
-      {/* Hero with Background Image */}
-      <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80"
-            alt="Modern workspace"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/60 to-gray-900/80" />
-        </div>
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="relative z-10 max-w-4xl mx-auto text-center px-4"
-        >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white/90 text-sm font-medium mb-6 border border-white/20">
-            About DeskSpace
-          </span>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight">
-            Where Work Meets{" "}
-            <span className="bg-gradient-to-r from-primary-300 to-purple-300 bg-clip-text text-transparent">
-              Inspiration
+    <>
+      {/* Hero */}
+      <section className="relative isolate overflow-hidden bg-ink-950 px-safe">
+        <img
+          src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 h-full w-full object-cover"
+        />
+        {/* Flat scrim, one opacity. */}
+        <div className="absolute inset-0 -z-10 bg-ink-950/75" />
+
+        <div className="mx-auto max-w-content px-4 pt-header pb-10 sm:px-6 sm:pb-16 lg:px-8 lg:pb-20">
+          <div className="max-w-3xl pt-8 sm:pt-14 lg:pt-16">
+            <span className="inline-block rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white">
+              About DeskPlace
             </span>
-          </h1>
-          <p className="mt-6 text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            We connect professionals with inspiring workspaces. Whether you need a
-            private office, a collaborative desk, or a meeting room — DeskSpace brings
-            the best workspace options in your city, all in one place.
-          </p>
-        </motion.div>
+            <h1 className="mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Where work meets <span className="text-primary-300">inspiration</span>
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/75 sm:text-lg">
+              We connect professionals with Hyderabad workspaces worth showing up to.
+              Private offices, collaborative desks, meeting rooms from HITEC City to
+              Secunderabad, all in one place.
+            </p>
+          </div>
+        </div>
       </section>
 
-      {/* Stats Bar */}
-      <section className="relative -mt-16 z-20 px-4">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="bg-white rounded-2xl shadow-xl border border-gray-100 grid grid-cols-2 lg:grid-cols-4 divide-x divide-gray-100"
-          >
-            {stats.map((s, i) => (
-              <motion.div
+      {/* Stats */}
+      <section className="relative z-10 -mt-7 px-4 px-safe sm:-mt-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl">
+          <Reveal className="grid grid-cols-2 divide-line rounded-2xl bg-surface shadow-card ring-1 ring-line sm:divide-x lg:grid-cols-4">
+            {stats.map((s) => (
+              <div
                 key={s.label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="flex flex-col items-center py-8 px-4"
+                className="flex flex-col items-center px-4 py-5 text-center sm:py-7"
               >
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center mb-3">
-                  <s.icon className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-2xl sm:text-3xl font-extrabold text-gray-900">{s.value}</span>
-                <span className="text-sm text-gray-500 mt-1">{s.label}</span>
-              </motion.div>
+                <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-brand-soft text-brand-soft-fg">
+                  <s.icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <CountUp
+                  value={s.value}
+                  className="text-2xl font-extrabold tracking-tight text-fg sm:text-3xl"
+                />
+                <span className="mt-1 text-sm text-muted">{s.label}</span>
+              </div>
             ))}
-          </motion.div>
+          </Reveal>
         </div>
       </section>
 
-      {/* Mission & Vision */}
-      <section className="py-24 px-4">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="space-y-8"
-          >
-            <div className="p-8 rounded-3xl bg-gradient-to-br from-primary-600 to-purple-600 text-white">
-              <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
-              <p className="text-primary-100 leading-relaxed">
-                To democratize access to premium workspaces by creating a transparent, easy-to-use
-                platform where businesses of all sizes can find and book the perfect office environment.
+      {/* Mission & vision */}
+      <section className="section-y px-safe">
+        <div className="mx-auto grid max-w-content items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
+          <Reveal className="space-y-8">
+            <div>
+              <span className="inline-block rounded-full bg-brand-soft px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-soft-fg">
+                Mission
+              </span>
+              <h2 className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-fg sm:text-3xl lg:text-4xl">
+                Make premium workspace accessible
+              </h2>
+              <p className="mt-3 leading-relaxed text-muted sm:text-lg">
+                A transparent, easy-to-use platform where businesses of any size can find
+                and book the right office environment without a broker and without a
+                three-week wait.
               </p>
             </div>
-            <div className="p-8 rounded-3xl bg-gray-50 border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Vision</h2>
-              <p className="text-gray-500 leading-relaxed">
-                A world where every professional has access to a workspace that inspires productivity,
-                fosters collaboration, and supports growth — regardless of where they are.
+            <div>
+              <span className="inline-block rounded-full bg-elevated px-3 py-1 text-xs font-semibold uppercase tracking-wide text-fg">
+                Vision
+              </span>
+              <h2 className="mt-4 text-2xl font-extrabold leading-tight tracking-tight text-fg sm:text-3xl lg:text-4xl">
+                A desk that fits, wherever you are
+              </h2>
+              <p className="mt-3 leading-relaxed text-muted sm:text-lg">
+                Every professional with access to a workspace that supports focus,
+                collaboration and growth regardless of the city they're in.
               </p>
             </div>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="relative"
-          >
+          </Reveal>
+
+          <Reveal index={1}>
             <img
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80"
-              alt="Team collaboration"
-              className="rounded-3xl shadow-2xl w-full object-cover h-[480px]"
+              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80"
+              alt="A team collaborating in a shared workspace"
+              loading="lazy"
+              className="aspect-[4/3] w-full rounded-2xl object-cover shadow-card lg:aspect-[4/5]"
             />
-            <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-primary-500 to-purple-500 rounded-2xl -z-10" />
-            <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-purple-200 to-primary-200 rounded-2xl -z-10" />
-          </motion.div>
+          </Reveal>
         </div>
       </section>
 
-      {/* Team Section */}
+      {/* Team */}
       {Array.isArray(team) && team.length > 0 && (
-        <section className="py-24 px-4 bg-gray-50">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-16"
-            >
-              <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">Our People</span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Meet the Team</h2>
-              <p className="text-gray-500 mt-3 max-w-lg mx-auto">
-                The passionate people building the future of workspace discovery
-              </p>
-            </motion.div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <section className="bg-sunken section-y px-safe">
+          <div className="mx-auto max-w-content px-4 sm:px-6 lg:px-8">
+            <SectionHeading
+              eyebrow="Team"
+              title="Meet the team"
+              subtitle="The people building the future of workspace discovery."
+            />
+            {/* Portrait-first cards: the name and role sit on the photo, and
+                the bio slides up over it on hover. On touch there is no hover,
+                so the bio is simply always visible there. */}
+            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
               {team.map((m, i) => (
-                <motion.div
-                  key={m._id}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  custom={i}
-                  variants={fadeUp}
-                  className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100"
-                >
-                  <div className="relative h-64 overflow-hidden">
+                <Reveal key={m._id} as="li" index={i}>
+                  <article className="group relative aspect-[4/5] overflow-hidden rounded-3xl bg-ink-900">
                     {m.photo ? (
                       <img
                         src={m.photo}
                         alt={m.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-500 ease-out md:group-hover:scale-[1.04]"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary-400 to-purple-400 flex items-center justify-center">
-                        <span className="text-6xl font-bold text-white/80">{m.name[0]}</span>
+                      <div className="flex h-full w-full items-center justify-center bg-brand text-7xl font-extrabold text-white">
+                        {m.name[0]}
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                  <div className="p-5">
-                    <h3 className="text-lg font-bold text-gray-900">{m.name}</h3>
-                    <p className="text-sm text-primary-600 font-semibold mt-0.5">{m.role}</p>
-                    {m.bio && (
-                      <p className="text-sm text-gray-500 mt-3 leading-relaxed line-clamp-3">{m.bio}</p>
-                    )}
-                  </div>
-                </motion.div>
+
+                    {/* Flat scrim panel behind the text, not a gradient wash. */}
+                    <div className="absolute inset-x-0 bottom-0 p-5">
+                      <div className="rounded-2xl bg-ink-950/75 p-4 backdrop-blur-md">
+                        <p className="text-lg font-bold tracking-tight text-white">
+                          {m.name}
+                        </p>
+                        <p className="mt-0.5 text-sm font-semibold text-primary-300">
+                          {m.role}
+                        </p>
+                        {m.bio && (
+                          <div
+                            className={
+                              "grid grid-rows-[1fr] transition-[grid-template-rows,opacity] duration-300 ease-out " +
+                              "md:grid-rows-[0fr] md:opacity-0 md:group-hover:grid-rows-[1fr] md:group-hover:opacity-100"
+                            }
+                          >
+                            <p className="overflow-hidden text-sm leading-relaxed text-white/75">
+                              <span className="mt-2 block">{m.bio}</span>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <span className="absolute left-5 top-5 flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-xs font-bold tabular-nums text-white backdrop-blur-md">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                  </article>
+                </Reveal>
               ))}
-            </div>
+            </ul>
           </div>
         </section>
       )}
 
-      {/* Awards Section */}
+      {/* Awards */}
       {Array.isArray(awards) && awards.length > 0 && (
-        <section className="py-24 px-4 bg-white">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-16"
-            >
-              <span className="text-sm font-semibold text-amber-600 uppercase tracking-wider">Recognition</span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Awards & Achievements</h2>
-              <p className="text-gray-500 mt-3 max-w-lg mx-auto">Milestones that define our journey</p>
-            </motion.div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <section className="section-y px-safe">
+          <div className="mx-auto max-w-content px-4 sm:px-6 lg:px-8">
+            <SectionHeading
+              eyebrow="Awards"
+              title="Awards & achievements"
+              subtitle="Milestones that define our journey."
+            />
+            {/* The card surface follows the theme and only the trophy chip stays
+                amber. A fixed cream panel left the themed title text sitting
+                white-on-cream in dark mode. */}
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
               {awards.map((a, i) => (
-                <motion.div
+                <Reveal
                   key={a._id}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  custom={i}
-                  variants={fadeUp}
-                  className="group relative bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 border border-amber-100 hover:shadow-lg transition-all duration-300"
+                  index={i}
+                  className="rounded-2xl bg-surface p-6 shadow-card ring-1 ring-line"
                 >
-                  <div className="flex items-center gap-4 mb-4">
-                    {a.image ? (
-                      <img src={a.image} alt={a.title} className="w-16 h-16 rounded-xl object-cover shadow-md" />
-                    ) : (
-                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center shadow-md">
-                        <Trophy className="w-8 h-8 text-white" />
-                      </div>
-                    )}
+                  <div className="mb-4 flex items-center gap-4">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-500 text-white">
+                      <Trophy className="h-6 w-6" aria-hidden="true" />
+                    </span>
                     {a.year && (
-                      <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">{a.year}</span>
+                      <span className="rounded-full bg-accent-500/15 px-2.5 py-1 text-xs font-bold text-accent-700 dark:text-accent-300">
+                        {a.year}
+                      </span>
                     )}
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900">{a.title}</h3>
+                  <h3 className="text-lg font-bold tracking-tight text-fg">
+                    {a.title}
+                  </h3>
                   {a.description && (
-                    <p className="text-sm text-gray-500 mt-2 leading-relaxed">{a.description}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted">
+                      {a.description}
+                    </p>
                   )}
-                </motion.div>
+                </Reveal>
               ))}
             </div>
           </div>
         </section>
       )}
 
-      {/* Company Values */}
-      <section className="py-24 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">Our DNA</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Values That Guide Us</h2>
-            <p className="text-gray-500 mt-3 max-w-2xl mx-auto">Every decision we make is rooted in these core principles</p>
-          </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Target, title: "User First", desc: "Every feature, every decision starts with what's best for the people using our platform.", color: "primary" },
-              { icon: Heart, title: "Trust & Transparency", desc: "Verified listings, honest pricing, real reviews. No hidden fees, no surprises.", color: "red" },
-              { icon: Lightbulb, title: "Continuous Innovation", desc: "We constantly evolve — new tools, better matching, smarter search. Standing still isn't an option.", color: "amber" },
-              { icon: Globe, title: "Global Mindset, Local Heart", desc: "Building a worldwide network while understanding every neighborhood we serve.", color: "green" },
-            ].map((item, i) => (
-              <motion.div
+      {/* Values */}
+      <section className="bg-sunken section-y px-safe">
+        <div className="mx-auto max-w-content px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            eyebrow="Our DNA"
+            title="Values that guide us"
+            subtitle="Every decision is rooted in these four principles."
+          />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+            {values.map((item, i) => (
+              <Reveal
                 key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:border-primary-200 hover:bg-white transition-all duration-300 hover:shadow-lg"
+                index={i}
+                className="rounded-2xl bg-surface p-6 shadow-card ring-1 ring-line"
               >
-                <div className={`w-14 h-14 rounded-2xl bg-${item.color}-100 flex items-center justify-center mb-5 text-${item.color}-600`}>
-                  <item.icon className="w-7 h-7" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
-                <p className="text-gray-500 leading-relaxed">{item.desc}</p>
-              </motion.div>
+                <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-soft text-brand-soft-fg">
+                  <item.icon className="h-6 w-6" aria-hidden="true" />
+                </span>
+                <h3 className="text-lg font-bold tracking-tight text-fg">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{item.desc}</p>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Timeline/Milestones */}
-      <section className="py-24 px-4 bg-gray-50">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">Journey</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Our Story So Far</h2>
-            <p className="text-gray-500 mt-3">Key milestones that shaped who we are today</p>
-          </motion.div>
-          <div className="relative">
-            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary-200 to-purple-200" />
-            {[
-              { year: "2024", title: "Series A Funding", desc: "Raised $15M to expand across India and launch AI-powered workspace matching.", icon: TrendingUp, color: "#6366f1" },
-              { year: "2023", title: "1000+ Workspaces", desc: "Crossed 1,000 verified workspace listings across 50+ Indian cities.", icon: Building2, color: "#a855f7" },
-              { year: "2022", title: "Mobile App Launch", desc: "Released iOS and Android apps with instant booking and virtual tours.", icon: Zap, color: "#f59e0b" },
-              { year: "2021", title: "Platform V2", desc: "Rebuilt from ground up with verified listings, reviews, and smart recommendations.", icon: Lightbulb, color: "#22c55e" },
-              { year: "2020", title: "Founded", desc: "Started with a mission to make finding workspace as easy as booking a hotel.", icon: Star, color: "#3b82f6" },
-            ].map((item, i) => (
-              <motion.div
+      {/* Timeline */}
+      <section className="section-y px-safe">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            eyebrow="Journey"
+            title="Our story so far"
+            subtitle="Key milestones that shaped who we are."
+          />
+          <ol className="relative">
+            {/* Solid rail, not a fading gradient. */}
+            <div
+              className="absolute bottom-4 left-[15px] top-2 w-0.5 bg-line-strong"
+              aria-hidden="true"
+            />
+            {milestones.map((item, i) => (
+              <Reveal
                 key={item.year}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="relative pl-20 pb-12 last:pb-0"
+                as="li"
+                index={Math.min(i, 3)}
+                className="relative pb-8 pl-12 last:pb-0"
               >
-                <div className="absolute left-4 top-1 w-8 h-8 rounded-full border-4 border-white flex items-center justify-center z-10" style={{ backgroundColor: item.color }}>
-                  <item.icon className="w-4 h-4 text-white" />
-                </div>
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-sm font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded-full">{item.year}</span>
-                    <h3 className="text-lg font-bold text-gray-900">{item.title}</h3>
+                <span className="absolute left-0 top-1 flex h-8 w-8 items-center justify-center rounded-full border-4 border-white bg-brand text-white">
+                  <item.icon className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                <div className="rounded-2xl bg-surface p-5 shadow-card ring-1 ring-line">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <span className="rounded-full bg-brand-soft px-2.5 py-1 text-xs font-bold text-brand-soft-fg">
+                      {item.year}
+                    </span>
+                    <h3 className="text-base font-bold tracking-tight text-fg">
+                      {item.title}
+                    </h3>
                   </div>
-                  <p className="text-gray-500">{item.desc}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-muted">{item.desc}</p>
                 </div>
-              </motion.div>
+              </Reveal>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
-      {/* Why DeskSpace */}
-      <section className="py-24 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <span className="text-sm font-semibold text-primary-600 uppercase tracking-wider">Difference</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-2">Why Choose DeskSpace?</h2>
-            <p className="text-gray-500 mt-3 max-w-2xl mx-auto">We're not just another listing platform — we're your partner in finding the perfect workspace</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Shield, title: "100% Verified", desc: "Every space personally vetted by our team. No fake listings, no surprises.", badge: "Trust" },
-              { icon: Zap, title: "Instant Access", desc: "Book tours, negotiate terms, and get keys in hours — not weeks.", badge: "Speed" },
-              { icon: Heart, title: "Dedicated Support", desc: "Real humans helping you every step. From search to move-in day.", badge: "Care" },
-              { icon: TrendingUp, title: "Flexible Terms", desc: "Month-to-month, yearly, or custom. Scale up or down as you grow.", badge: "Freedom" },
-            ].map((item, i) => (
-              <motion.div
+      {/* Why us */}
+      <section className="bg-sunken section-y px-safe">
+        <div className="mx-auto max-w-content px-4 sm:px-6 lg:px-8">
+          <SectionHeading
+            eyebrow="Difference"
+            title="Why choose DeskPlace"
+            subtitle="Not another listing site a partner in finding the right room."
+          />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+            {differences.map((item, i) => (
+              <Reveal
                 key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="relative p-6 rounded-2xl bg-gray-50 border border-gray-100 hover:border-primary-200 hover:bg-white transition-all duration-300 hover:shadow-xl"
+                index={i}
+                className="relative rounded-2xl bg-surface p-6 shadow-card ring-1 ring-line"
               >
-                <span className="absolute -top-3 left-6 px-3 py-1 text-xs font-bold text-white bg-primary-500 rounded-full">{item.badge}</span>
-                <div className="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center mb-4 text-primary-600">
-                  <item.icon className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-gray-500 leading-relaxed">{item.desc}</p>
-              </motion.div>
+                <span className="absolute right-4 top-4 rounded-md bg-elevated px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-muted">
+                  {item.badge}
+                </span>
+                <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-soft text-brand-soft-fg">
+                  <item.icon className="h-6 w-6" aria-hidden="true" />
+                </span>
+                <h3 className="text-lg font-bold tracking-tight text-fg">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{item.desc}</p>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-24 px-4 bg-gradient-to-br from-primary-600 to-purple-600 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,white_0%,transparent_50%)]" />
-        </div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="relative z-10 max-w-3xl mx-auto text-center"
-        >
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Ready to Find Your Space?</h2>
-          <p className="text-primary-100 text-lg mb-8">
-            Join thousands of professionals who found their perfect workspace through DeskSpace.
+      <section className="bg-brand section-y px-safe">
+        <Reveal className="mx-auto max-w-3xl px-4 text-center sm:px-6">
+          <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+            Ready to find your space?
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl leading-relaxed text-primary-100 sm:text-lg">
+            Join thousands of professionals who found their workspace through DeskPlace.
           </p>
-          <a
-            href="/workspaces"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-base font-semibold text-primary-700 bg-white hover:bg-primary-50 shadow-lg transition-all"
-          >
-            Explore Workspaces
-          </a>
-        </motion.div>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Button to="/workspaces" variant="white" size="lg">
+              Explore workspaces
+            </Button>
+            <Button
+              to="/contact"
+              size="lg"
+              className="bg-primary-500 text-white md:hover:bg-primary-400"
+            >
+              Talk to us
+            </Button>
+          </div>
+        </Reveal>
       </section>
-    </div>
+    </>
   );
 }

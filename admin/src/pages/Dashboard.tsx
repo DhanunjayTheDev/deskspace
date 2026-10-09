@@ -152,7 +152,7 @@ export default function Dashboard() {
         {/* Area Chart - Leads over 7 days */}
         <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-5">
           <div className="mb-4">
-            <h2 className="text-sm font-semibold text-gray-900">Leads — Last 7 Days</h2>
+            <h2 className="text-sm font-semibold text-gray-900">Leads Last 7 Days</h2>
             <p className="text-xs text-gray-400 mt-0.5">Daily enquiry volume</p>
           </div>
           <ResponsiveContainer width="100%" height={220}>

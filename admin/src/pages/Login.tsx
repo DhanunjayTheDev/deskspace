@@ -68,7 +68,7 @@ export default function Login() {
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/25">
                 <Building2 className="w-6 h-6 text-white" />
               </div>
-              <h1 className="mt-5 text-2xl font-bold text-neutral-950 tracking-tight">DeskSpace</h1>
+              <h1 className="mt-5 text-2xl font-bold text-neutral-950 tracking-tight">deskplace</h1>
               <p className="mt-1 text-sm text-neutral-500">Admin Dashboard</p>
             </div>
 
@@ -90,7 +90,7 @@ export default function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     onFocus={() => setFocused("email")}
                     onBlur={() => setFocused(null)}
-                    placeholder="admin@deskspace.in"
+                    placeholder="admin@deskplace.in"
                     className={`
                       w-full h-11 pl-4 pr-10 rounded-lg border bg-white/60 text-sm text-neutral-950 placeholder-neutral-400
                       focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200
